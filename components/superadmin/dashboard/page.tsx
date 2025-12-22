@@ -3,6 +3,8 @@ import StatCard from "@/components/ui/StatCard";
 import SectionCard from "@/components/ui/common/SectionCard";
 import SchoolsMiniTable from "@/components/ui/SchoolsMiniTable";
 import FeeTransactionsTable from "@/components/ui/FeeTransactionsTable";
+import { FiUsers } from "react-icons/fi";
+import { HiOutlineAcademicCap } from "react-icons/hi";
 export default function DashboardPage({stats, schools, transactions}: {stats: {totalSchools: number; totalStudents: number}; schools: any[]; transactions: any[]}) {
   
 
@@ -16,10 +18,12 @@ export default function DashboardPage({stats, schools, transactions}: {stats: {t
               <StatCard
                 title="Total No. of Schools"
                 value={stats.totalSchools}
+                icon={<HiOutlineAcademicCap />}
               />
               <StatCard
                 title="Total No. of Students"
                 value={stats.totalStudents}
+                icon={<FiUsers />}
                 iconBg="bg-purple-500"
               />
               <SectionCard title="Schools">

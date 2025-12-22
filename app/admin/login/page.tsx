@@ -68,7 +68,9 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md space-y-6"
         >
-          <BrandLogo />
+          <div className="flex flex-col items-center mb-4">
+            <BrandLogo size="auth" />
+          </div>
 
           <div>
             <h1 className="text-2xl font-semibold text-white">Log In</h1>

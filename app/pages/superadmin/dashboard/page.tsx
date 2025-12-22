@@ -27,12 +27,19 @@ export default function SuperAdminLayout() {
           .then((r) => setTransactions(r.data.slice(0, 8)));
       }, []);
   return (
-    <div className="flex">
-         <Sidebar menuItems={SUPERADMIN_SIDEBAR_ITEMS} />
-         <div className="flex-1">
-           <TopNavbar />
-            <DashboardPage stats={stats} schools={schools} transactions={transactions} />
-         </div>
-       </div>
+  <div className="h-screen flex flex-col">
+  <TopNavbar />
+  <div className="flex flex-1 overflow-hidden">
+    <Sidebar menuItems={SUPERADMIN_SIDEBAR_ITEMS} />
+    <main className="flex-1 overflow-y-auto p-4">
+      <DashboardPage
+        stats={stats}
+        schools={schools}
+        transactions={transactions}
+      />
+    </main>
+  </div>
+</div>
+
   );
 }

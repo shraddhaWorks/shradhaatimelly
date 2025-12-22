@@ -3,6 +3,7 @@
 import { IMenuItem } from "@/interfaces/dashboard";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import BrandLogo from "../ui/common/BrandLogo";
 
 
 export default function Sidebar({menuItems}:{menuItems:IMenuItem[]}) {
@@ -11,12 +12,7 @@ export default function Sidebar({menuItems}:{menuItems:IMenuItem[]}) {
   return (
     <aside className="w-64 bg-white h-screen  px-4 py-6">
       {/* Logo */}
-      <div className="flex items-center gap-2 mb-10 px-2">
-        <div className="w-10 h-10 rounded-full bg-[#43b771] flex items-center justify-center text-white font-bold">
-          T
-        </div>
-        <span className="text-xl font-semibold">timelly</span>
-      </div>
+      
 
       {/* Menu */}
       <nav className="space-y-2">
