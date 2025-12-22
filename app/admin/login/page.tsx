@@ -5,10 +5,10 @@ import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-import InputField from "@/components/ui/InputField";
-import PrimaryButton from "@/components/ui/PrimaryButton";
-import BrandLogo from "@/components/ui/BrandLogo";
-import AuthIllustration from "@/components/auth/AuthIllustration";
+import InputField from "@/components/ui/common/InputField";
+import PrimaryButton from "@/components/ui/common/PrimaryButton";
+import BrandLogo from "@/components/ui/common/BrandLogo";
+import AuthIllustration from "@/components/ui/AuthIllustration";
 import { MAIN_COLOR } from "@/constants/colors";
 
 export default function LoginPage() {
@@ -47,7 +47,7 @@ export default function LoginPage() {
     if (!session?.user) return;
 
     const roleRoutes: Record<string, string> = {
-      SUPERADMIN: "/admin/super",
+      SUPERADMIN: "pages/superadmin/dashboard",
       SCHOOLADMIN: "/schoolAdmin",
       TEACHER: "/teachersPortal",
       STUDENT: "/student",
