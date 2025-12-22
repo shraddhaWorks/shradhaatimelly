@@ -1,11 +1,24 @@
-export default function BrandLogo() {
+type BrandLogoProps = {
+  isbrandLogoWhite?: boolean;
+  size?: "navbar" | "auth";
+};
+
+export default function BrandLogo({
+  isbrandLogoWhite = true,
+  size = "navbar",
+}: BrandLogoProps) {
   return (
-    <div className="flex items-center mt-2 justify-center">
-      <img
-        src="/whitetimellylogo.png"
-        alt="Timelly"
-        className="h-40 w-auto object-contain"
-      />
-    </div>
+    <img
+      src={
+        isbrandLogoWhite
+          ? "/whitetimellylogo.png"
+          : "/blacktimellylogo.png"
+      }
+      alt="Timelly"
+      className={`object-contain ${size === "auth"
+          ? "h-50 w-auto"
+          : "h-30 w-auto"
+        }`}
+    />
   );
 }
