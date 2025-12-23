@@ -1,3 +1,5 @@
+import { LIGHT_BG_COLOR } from "@/constants/colors";
+
 interface StatCardProps {
   title: string;
   value: number;
@@ -12,10 +14,10 @@ export default function StatCard({
   iconBg = "bg-[#43b771]",
 }: StatCardProps) {
   return (
-    <div className="bg-[#43b771]/20 rounded-2xl p-6 flex justify-between items-center">
+    <div style={{ backgroundColor: LIGHT_BG_COLOR }} className=" rounded-2xl p-6 flex justify-between items-center">
       <div>
-        <p className="text-sm text-gray-600">{title}</p>
         <p className="text-3xl font-bold mt-1">{value}</p>
+        <p className="text-sm text-gray-600">{title}</p>
       </div>
 
       <div

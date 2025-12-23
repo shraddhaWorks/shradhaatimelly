@@ -10,6 +10,7 @@ import PrimaryButton from "@/components/ui/common/PrimaryButton";
 import BrandLogo from "@/components/ui/common/BrandLogo";
 import AuthIllustration from "@/components/ui/AuthIllustration";
 import { MAIN_COLOR } from "@/constants/colors";
+import Checkbox from "@/components/ui/common/checkbox";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -86,9 +87,11 @@ export default function LoginPage() {
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            isBorderBlack={false}
           />
 
           <InputField
+            isBorderBlack={false}
             label="Password"
             type={showPassword ? "text" : "password"}
             placeholder="Enter password"
@@ -106,21 +109,9 @@ export default function LoginPage() {
           />
 
           <label className="flex items-center gap-2 cursor-pointer select-none relative">
-            <input
-              type="checkbox" value={checkBoxValue?"true":"false"}
-              onChange={(e) => setcheckBoxValue(e.target.checked)}
-              className="
-                peer
-                w-4 h-4
-                appearance-none 
-                bg-transparent
-                border border-white
-                rounded
-                cursor-pointer
-                transition
-
-                focus:outline-none
-              "
+           <Checkbox
+              checked={checkBoxValue}
+              onChange={(checked) => setcheckBoxValue(checked)}
             />
 
             {/* Centered white tick */}

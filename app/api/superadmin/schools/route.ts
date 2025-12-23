@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { Role } from "@/app/generated/prisma";
+
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
   const page = Number(searchParams.get("page") ?? 1);
-  const limit = Number(searchParams.get("limit") ?? 10);
+  const limit = Number(searchParams.get("limit") ?? 8);
   const search = searchParams.get("search") ?? "";
 
   const skip = (page - 1) * limit;
@@ -21,12 +23,22 @@ export async function GET(req: Request) {
         },
         include: {
           students: true,
-          admins: true,
+          admins: {
+            where: { role: Role.SCHOOLADMIN },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              mobile: true,
+            },
+            take: 1, // only primary admin
+          },
         },
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
       }),
+
       prisma.school.count({
         where: {
           name: {
@@ -42,7 +54,7 @@ export async function GET(req: Request) {
       data: schools.map((school) => ({
         id: school.id,
         name: school.name,
-        adminCount: school.admins.length,
+        admin: school.admins[0] ?? null,
         studentCount: school.students.length,
         createdAt: school.createdAt,
       })),
@@ -52,7 +64,8 @@ export async function GET(req: Request) {
         limit,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch schools" },
       { status: 500 }

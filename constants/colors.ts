@@ -1,2 +1,3 @@
 export const MAIN_COLOR = "#43b771";
 export const WHITE_COLOR="#ffffff";
+export const LIGHT_BG_COLOR="#D6F0C8";

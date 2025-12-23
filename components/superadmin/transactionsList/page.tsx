@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Search, CalendarDays } from "lucide-react";
-
-type Transaction = {
+import DataTable from "@/components/ui/TableData";
+export type Transaction = {
   id: string;
   studentName: string;
   schoolName: string;
@@ -11,6 +11,7 @@ type Transaction = {
   status: string;
   date: string;
 };
+import { Column } from "@/components/ui/TableData";
 
 export default function TransactionsListPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -41,6 +42,28 @@ export default function TransactionsListPage() {
     );
   }, [transactions, search]);
 
+
+const getTransactionsListColumns = (): Column<Transaction>[] => [
+  {
+    header: "Sl. No",
+    render: (_: Transaction, index: number) =>
+      String(index + 1).padStart(2, "0"),
+  },
+  {
+    header: "Schools",
+    render: (t: Transaction) => (
+      <div className="flex flex-col">
+        <span className="text-sm font-medium">
+          {t.schoolName}
+        </span>
+        <span className="text-xs text-gray-400">
+          ₹{t.amount} • {t.status}
+        </span>
+      </div>
+    ),
+  },
+];
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm max-w-3xl mx-auto">
       {/* Header */}
@@ -65,43 +88,13 @@ export default function TransactionsListPage() {
         </div>
       </div>
 
-      {/* Card */}
-      <div className="border rounded-xl overflow-hidden">
-        <div className="bg-green-50 px-4 py-3 font-medium text-sm grid grid-cols-2">
-          <span>Sl. No</span>
-          <span>Schools</span>
-        </div>
-
-        {loading ? (
-          <div className="p-6 text-center text-gray-400">
-            Loading transactions...
-          </div>
-        ) : filteredTransactions.length === 0 ? (
-          <div className="p-6 text-center text-gray-400">
-            No transactions found
-          </div>
-        ) : (
-          filteredTransactions.map((t, index) => (
-            <div
-              key={t.id}
-              className="grid grid-cols-2 px-4 py-3 border-t items-center hover:bg-gray-50"
-            >
-              <span className="text-sm text-gray-500">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">
-                  {t.schoolName}
-                </span>
-                <span className="text-xs text-gray-400">
-                  ₹{t.amount} • {t.status}
-                </span>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+      {/* Table */}
+      <DataTable
+        columns={getTransactionsListColumns()}
+        data={filteredTransactions}
+        loading={loading}
+        emptyText="No transactions found"
+      />
     </div>
   );
 }

@@ -2,13 +2,19 @@
 
 import { Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-
+import Image from "next/image";
+import DataTable from "@/components/ui/TableData";
+import { Column } from "@/components/ui/TableData";
+import Checkbox from "@/components/ui/common/checkbox";
 type School = {
   id: string;
   name: string;
-  adminCount: number;
   studentCount: number;
-  createdAt: string;
+  admin: {
+    name: string | null;
+    email: string | null;
+    mobile: string | null;
+  } | null;
 };
 
 export default function SchoolsListPage() {
@@ -18,6 +24,7 @@ export default function SchoolsListPage() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -42,6 +49,71 @@ export default function SchoolsListPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+
+const columns: Column<School>[] = [
+  {
+    header: "",
+    render: (school) => (
+      <Checkbox
+        checked={selected.includes(school.id)}
+        onChange={() => toggleSelect(school.id)}
+        isWhiteBorder={false}
+      />
+    ),
+    align: "center",
+  },
+  {
+    header: "Admin Id",
+    render: (_school, index) =>
+      String((page - 1) * limit + index + 1).padStart(2, "0"),
+  },
+  {
+    header: "School Name",
+    render: (school) => school.name,
+  },
+  {
+    header: "Admin Name",
+    render: (school) => school.admin?.name ?? "-",
+  },
+  {
+    header: "Contact",
+    render: (school) => school.admin?.mobile ?? "-",
+  },
+  {
+    header: "Admin Role",
+    render: () => "School Admin",
+  },
+  {
+    header: "Email",
+    render: (school) => (
+      <span className="text-green-600 underline">
+        {school.admin?.email ?? "-"}
+      </span>
+    ),
+  },
+  {
+    header: "Total No of Students",
+    render: (school) => school.studentCount,
+  },
+  {
+    header: "Delete",
+    render: () => (
+      <Trash2
+        size={16}
+        className="text-gray-400 hover:text-red-500 cursor-pointer"
+      />
+    ),
+    align: "center",
+  },
+];
+
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm">
       {/* Header */}
@@ -63,51 +135,12 @@ export default function SchoolsListPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden border rounded-xl">
-        <table className="w-full text-sm">
-          <thead className="bg-green-50">
-            <tr>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">School Name</th>
-              <th className="p-3 text-left">Admins</th>
-              <th className="p-3 text-left">Students</th>
-              <th className="p-3 text-left">Created</th>
-              <th className="p-3 text-center">Delete</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="p-6 text-center text-gray-400">
-                  Loading schools...
-                </td>
-              </tr>
-            ) : schools.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-6 text-center text-gray-400">
-                  No schools found
-                </td>
-              </tr>
-            ) : (
-              schools.map((school) => (
-                <tr key={school.id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">{school.id.slice(0, 6)}</td>
-                  <td className="p-3 font-medium">{school.name}</td>
-                  <td className="p-3">{school.adminCount}</td>
-                  <td className="p-3">{school.studentCount}</td>
-                  <td className="p-3">
-                    {new Date(school.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-3 text-center">
-                    <Trash2 className="text-gray-400 hover:text-red-500 cursor-pointer" size={16} />
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={schools}
+        loading={loading}
+        emptyText="No schools found"
+      />
 
       {/* Pagination */}
       <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
@@ -120,7 +153,7 @@ export default function SchoolsListPage() {
         </button>
 
         <span>
-          Page {page} of {totalPages}
+          Page {loading ? 0 : page} of {totalPages}
         </span>
 
         <button

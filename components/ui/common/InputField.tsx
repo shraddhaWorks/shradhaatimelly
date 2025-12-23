@@ -7,6 +7,7 @@ interface InputFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   rightElement?: React.ReactNode;
+  isBorderBlack?: boolean;
 }
 
 export default function InputField({
@@ -16,6 +17,7 @@ export default function InputField({
   value,
   onChange,
   rightElement,
+  isBorderBlack = true,
 }: InputFieldProps) {
   return (
     <div className="space-y-2">
@@ -27,9 +29,9 @@ export default function InputField({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          style={{borderColor:isBorderBlack?`black`:`${MAIN_COLOR}`,color: isBorderBlack?'black':'white'}}
           className="
             w-full
-            bg-white
             border
             rounded-xl
             px-4 py-3
@@ -39,6 +41,7 @@ export default function InputField({
             placeholder-gray-500
             focus:outline-none
             focus:ring-0
+            bg-transparent
             transition
           "
         />
