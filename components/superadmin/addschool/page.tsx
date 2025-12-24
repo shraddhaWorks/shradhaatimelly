@@ -10,6 +10,12 @@ import { EDUCATION_BOARDS } from "@/constants/boards";
 import { MAIN_COLOR } from "@/constants/colors";
 import { SchoolFormState } from "@/interfaces/dashboard";
 
+type FormErrors = {
+  schoolName?: string;
+  password?: string;
+  email?: string;
+};
+
 export default function AddSchoolPage() {
   const router = useRouter();
 
@@ -28,6 +34,7 @@ export default function AddSchoolPage() {
     state: "",
   });
 
+  const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -51,13 +58,39 @@ export default function AddSchoolPage() {
     (field: keyof SchoolFormState) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     };
+
+  /* -------- Validation -------- */
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+
+    if (!form.schoolName.trim()) {
+      newErrors.schoolName = "School name is required";
+    }
+
+    if (!form.password.trim()) {
+      newErrors.password = "Password is required";
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   /* -------- Submit Handler -------- */
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+
+    if (!validateForm()) return;
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/admin/signup", {
@@ -75,13 +108,11 @@ export default function AddSchoolPage() {
 
       if (!res.ok) {
         setError(data.message || "Signup failed");
-        setLoading(false);
         return;
       }
 
-      // ✅ Show success popup
       setShowSuccess(true);
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -103,6 +134,7 @@ export default function AddSchoolPage() {
       district: "",
       state: "",
     });
+    setErrors({});
     setLogoFile(null);
   };
 
@@ -116,11 +148,7 @@ export default function AddSchoolPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Add New School</h1>
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="text-gray-500"
-            >
+            <button type="button" onClick={handleReset} className="text-gray-500">
               Reset
             </button>
 
@@ -128,16 +156,7 @@ export default function AddSchoolPage() {
               type="submit"
               disabled={loading}
               style={{ backgroundColor: MAIN_COLOR }}
-              className="
-                text-white
-                px-6
-                py-2
-                rounded-lg
-                font-medium
-                hover:opacity-90
-                disabled:opacity-60
-                disabled:cursor-not-allowed
-              "
+              className="text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
             >
               {loading ? "Saving..." : "Save"}
             </button>
@@ -148,19 +167,30 @@ export default function AddSchoolPage() {
 
         {/* Basic Information */}
         <FormSection title="Basic Information">
-          <InputField
-            label="School Name"
-            placeholder="School Name"
-            value={form.schoolName}
-            onChange={handleChange("schoolName")}
-          />
-          <InputField
-            label="Password"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange("password")}
-          />
+          <div>
+            <InputField
+              label="School Name *"
+              placeholder="School Name"
+              value={form.schoolName}
+              onChange={handleChange("schoolName")}
+            />
+            {errors.schoolName && (
+              <p className="text-red-500 text-sm mt-1">{errors.schoolName}</p>
+            )}
+          </div>
+
+          <div>
+            <InputField
+              label="Password *"
+              type="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange("password")}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
         </FormSection>
 
         {/* Contact Information */}
@@ -172,13 +202,19 @@ export default function AddSchoolPage() {
               value={form.phone}
               onChange={handleChange("phone")}
             />
-            <InputField
-              label="Email"
-              type="email"
-              placeholder="example@gmail.com"
-              value={form.email}
-              onChange={handleChange("email")}
-            />
+
+            <div>
+              <InputField
+                label="Email *"
+                type="email"
+                placeholder="example@gmail.com"
+                value={form.email}
+                onChange={handleChange("email")}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
           </div>
         </FormSection>
 
@@ -206,42 +242,12 @@ export default function AddSchoolPage() {
         {/* Address Details */}
         <FormSection title="Address Details">
           <div className="grid grid-cols-2 gap-6">
-            <InputField
-              label="Address Line"
-              placeholder="Address line"
-              value={form.addressLine}
-              onChange={handleChange("addressLine")}
-            />
-            <InputField
-              label="Pincode"
-              placeholder="Pincode"
-              value={form.pincode}
-              onChange={handleChange("pincode")}
-            />
-            <InputField
-              label="Area / Locality"
-              placeholder="Area / Locality"
-              value={form.area}
-              onChange={handleChange("area")}
-            />
-            <InputField
-              label="City"
-              placeholder="City"
-              value={form.city}
-              onChange={handleChange("city")}
-            />
-            <InputField
-              label="District"
-              placeholder="District"
-              value={form.district}
-              onChange={handleChange("district")}
-            />
-            <InputField
-              label="State"
-              placeholder="State"
-              value={form.state}
-              onChange={handleChange("state")}
-            />
+            <InputField label="Address Line" value={form.addressLine} onChange={handleChange("addressLine")} placeholder={""} />
+            <InputField label="Pincode" value={form.pincode} onChange={handleChange("pincode")} placeholder={""} />
+            <InputField label="Area / Locality" value={form.area} onChange={handleChange("area")} placeholder={""} />
+            <InputField label="City" value={form.city} onChange={handleChange("city")} placeholder={""} />
+            <InputField label="District" value={form.district} onChange={handleChange("district")} placeholder={""} />
+            <InputField label="State" value={form.state} onChange={handleChange("state")} placeholder={""} />
           </div>
         </FormSection>
 
@@ -260,9 +266,7 @@ export default function AddSchoolPage() {
           </div>
 
           <p className="text-sm text-gray-600 mb-2">
-            {logoFile
-              ? `Selected file: ${logoFile.name}`
-              : "Drop your Logo to upload"}
+            {logoFile ? `Selected file: ${logoFile.name}` : "Drop your Logo to upload"}
           </p>
 
           <button
@@ -275,7 +279,6 @@ export default function AddSchoolPage() {
         </div>
       </form>
 
-      {/* ✅ Success Popup */}
       <SuccessPopup
         open={showSuccess}
         title="School Created Successfully!"
