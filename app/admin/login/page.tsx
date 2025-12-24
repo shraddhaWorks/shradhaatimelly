@@ -49,9 +49,9 @@ export default function LoginPage() {
 
     const roleRoutes: Record<string, string> = {
       SUPERADMIN: "/frontend/superadmin/dashboard",
-      SCHOOLADMIN: "/schoolAdmin",
-      TEACHER: "/teachersPortal",
-      STUDENT: "/student",
+      SCHOOLADMIN: "/frontend/schooladmin/dashboard",
+      TEACHER: "/frontend/teachersPortal",
+      STUDENT: "/frontend/student",
     };
 
     router.push(roleRoutes[session.user.role] || "/unauthorized");
