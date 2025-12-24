@@ -2,10 +2,11 @@
 
 import { Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import DataTable from "@/components/ui/TableData";
 import { Column } from "@/components/ui/TableData";
 import Checkbox from "@/components/ui/common/checkbox";
+import { useDebounce } from "@/app/hooks/useDebounce";
+
 type School = {
   id: string;
   name: string;
@@ -28,16 +29,19 @@ export default function SchoolsListPage() {
 
   const totalPages = Math.ceil(total / limit);
 
+  const debouncedSearch = useDebounce(search, 500);
+
   useEffect(() => {
     fetchSchools();
-  }, [page, search]);
+  }, [page, debouncedSearch]);
 
   const fetchSchools = async () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `/api/superadmin/schools?page=${page}&limit=${limit}&search=${search}`
+        `/api/superadmin/schools?page=${page}&limit=${limit}&search=${debouncedSearch}`
       );
+
       const json = await res.json();
 
       if (json.success) {
@@ -55,64 +59,62 @@ export default function SchoolsListPage() {
     );
   };
 
-
-const columns: Column<School>[] = [
-  {
-    header: "",
-    render: (school) => (
-      <Checkbox
-        checked={selected.includes(school.id)}
-        onChange={() => toggleSelect(school.id)}
-        isWhiteBorder={false}
-      />
-    ),
-    align: "center",
-  },
-  {
-    header: "Admin Id",
-    render: (_school, index) =>
-      String((page - 1) * limit + index + 1).padStart(2, "0"),
-  },
-  {
-    header: "School Name",
-    render: (school) => school.name,
-  },
-  {
-    header: "Admin Name",
-    render: (school) => school.admin?.name ?? "-",
-  },
-  {
-    header: "Contact",
-    render: (school) => school.admin?.mobile ?? "-",
-  },
-  {
-    header: "Admin Role",
-    render: () => "School Admin",
-  },
-  {
-    header: "Email",
-    render: (school) => (
-      <span className="text-green-600 underline">
-        {school.admin?.email ?? "-"}
-      </span>
-    ),
-  },
-  {
-    header: "Total No of Students",
-    render: (school) => school.studentCount,
-  },
-  {
-    header: "Delete",
-    render: () => (
-      <Trash2
-        size={16}
-        className="text-gray-400 hover:text-red-500 cursor-pointer"
-      />
-    ),
-    align: "center",
-  },
-];
-
+  const columns: Column<School>[] = [
+    {
+      header: "",
+      render: (school) => (
+        <Checkbox
+          checked={selected.includes(school.id)}
+          onChange={() => toggleSelect(school.id)}
+          isWhiteBorder={false}
+        />
+      ),
+      align: "center",
+    },
+    {
+      header: "Admin Id",
+      render: (_school, index) =>
+        String((page - 1) * limit + index + 1).padStart(2, "0"),
+    },
+    {
+      header: "School Name",
+      render: (school) => school.name,
+    },
+    {
+      header: "Admin Name",
+      render: (school) => school.admin?.name ?? "-",
+    },
+    {
+      header: "Contact",
+      render: (school) => school.admin?.mobile ?? "-",
+    },
+    {
+      header: "Admin Role",
+      render: () => "School Admin",
+    },
+    {
+      header: "Email",
+      render: (school) => (
+        <span className="text-green-600 underline">
+          {school.admin?.email ?? "-"}
+        </span>
+      ),
+    },
+    {
+      header: "Total No of Students",
+      render: (school) => school.studentCount,
+    },
+    {
+      header: "Delete",
+      render: () => (
+        <Trash2
+          size={16}
+          className="text-gray-400 hover:text-red-500 cursor-pointer"
+        />
+      ),
+      align: "center",
+    },
+  ];
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm">

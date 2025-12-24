@@ -1,4 +1,5 @@
 
+import { IMenuItem } from "@/interfaces/dashboard";
 import {
   FiHome,
   FiPlusCircle,
@@ -7,7 +8,7 @@ import {
   FiLogOut,
 } from "react-icons/fi";
 
-export const SUPERADMIN_SIDEBAR_ITEMS = [
+export const SUPERADMIN_SIDEBAR_ITEMS:IMenuItem[] = [
   {
     label: "Dashboard",
     href: "/frontend/superadmin/dashboard",
@@ -36,5 +37,6 @@ export const SUPERADMIN_SIDEBAR_ITEMS = [
     label: "Sign Out",
     action: "logout",
     icon: FiLogOut,
+    href: "#",
   },
 ];

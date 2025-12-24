@@ -5,10 +5,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import TopNavbar from "@/components/layout/TopNavbar";
 import DashboardPage from "@/components/superadmin/dashboard/page";
-// import SchoolsPage from "@/components/superadmin/schools/page";
 import AddSchoolPage from "@/components/superadmin/addschool/page";
-// import TransactionsPage from "@/components/superadmin/transactions/page";
-
 import { SUPERADMIN_SIDEBAR_ITEMS } from "@/constants/superadmin/sidebar";
 import { useSearchParams } from "next/navigation";
 import SchoolsListPage from "@/components/superadmin/schoolsList/page";

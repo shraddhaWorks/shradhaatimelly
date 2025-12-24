@@ -17,7 +17,7 @@ export default function BrandLogo({
       alt="Timelly"
       className={`object-contain ${size === "auth"
           ? "h-50 w-auto"
-          : "h-30 w-auto"
+          : "h-40 w-auto"
         }`}
     />
   );
