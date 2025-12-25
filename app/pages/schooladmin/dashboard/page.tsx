@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import SchoolAdminSideBar from "@/components/layout/SchoolAdminSideBar";
 import { SCHOOLADMIN_MENU_ITEMS } from "@/constants/schooladmin/sidebar";
 import DashboardTab from "@/components/schooladmin/dashboard/page";
+import { useDashboardData } from "@/app/hooks/useSchoolAdminDashboard";
 
 // TAB VIEWS;
 // import StudentsTab from "./tabs/StudentsTab";
@@ -16,7 +17,8 @@ import DashboardTab from "@/components/schooladmin/dashboard/page";
 export default function SchoolAdminLayout() {
   const [open, setOpen] = useState(false);
   const tab = useSearchParams().get("tab") ?? "dashboard";
-
+   const { loading, error, stats, attendance, workshops, news, reload } =
+  useDashboardData();
   const renderPage = () => {
     switch (tab) {
       case "students":
@@ -26,7 +28,7 @@ export default function SchoolAdminLayout() {
       case "payments":
         // return <PaymentsTab />;
       default:
-        return <DashboardTab />;
+        return <DashboardTab loading={loading} stats={stats} attendance={attendance} workshops={workshops} news={news} reload={reload} error={error} />;
     }
   };
 

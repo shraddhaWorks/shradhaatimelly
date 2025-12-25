@@ -170,7 +170,7 @@ export default function EventsPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-green-700">Events & Workshops</h1>
-          {session.user.role === "TEACHER" && (
+          {session.user.role === "SCHOOLADMIN" && (
             <button
               onClick={() => setShowForm(!showForm)}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition"
@@ -193,7 +193,7 @@ export default function EventsPage() {
         )}
 
         {/* Create Event Form (Teachers only) */}
-        {showForm && session.user.role === "TEACHER" && (
+        {showForm && session.user.role === "SCHOOLADMIN" && (
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
             <h2 className="text-xl font-bold mb-4 text-green-700">Create New Event</h2>
             <form onSubmit={handleCreateEvent} className="space-y-4">

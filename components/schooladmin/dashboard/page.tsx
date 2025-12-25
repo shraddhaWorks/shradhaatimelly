@@ -1,6 +1,51 @@
 "use client";
+import SchoolAdminAttendanceCard from "@/components/ui/SchoolAdminAttendanceCard";
+import SchoolAdminNewsFeedCard from "@/components/ui/SchoolAdminNewsFeedCard";
+import SchoolAdminWorkshopCard from "@/components/ui/SchoolAdminWorkshopCard";
+import SchoolAdminStatCard from "@/components/ui/SchoolAdminStatCard";
+import {
+  BookOpen,
+  Users,
+  GraduationCap,
+  CalendarDays,
+  IndianRupee,
+} from "lucide-react";
 
-export default function DashboardTab() {
+interface DashboardTabProps {
+  loading: boolean;
+  stats: any;
+  attendance: any;
+  workshops: any;
+  news: any;
+  reload: any;
+  error: any;
+}
+
+export default function DashboardTab({
+  loading,
+  stats,
+  attendance,
+  workshops,
+  news,
+  error,
+  reload,
+}: DashboardTabProps) {
+  if (loading) {
+    return <p className="text-gray-400 text-center">Loading dashboard...</p>;
+  }
+
+  {
+    error && (
+      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded-lg mb-4">
+        <p className="font-medium">{error.message}</p>
+        <p className="text-sm">Failed: {error.failedApis.join(", ")}</p>
+        <button onClick={reload} className="mt-2 text-sm underline">
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -13,97 +58,71 @@ export default function DashboardTab() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard title="Total Classes" value="12" />
-        <StatCard title="Total Students" value="456" />
-        <StatCard title="Total Teachers" value="32" />
-        <StatCard title="Upcoming Workshops" value="5" />
-        <StatCard title="Fees Collected (This Year)" value="₹42.5L" />
+        <SchoolAdminStatCard
+          title="Total Classes"
+          value={stats.totalClasses}
+          icon={<BookOpen size={90} className="text-black" />}
+          bg="bg-blue-50"
+          iconBg="bg-blue-500"
+          index={0}
+        />
+
+        <SchoolAdminStatCard
+          title="Total Students"
+          value={stats.totalStudents}
+          icon={<Users size={90} className="text-black" />}
+          bg="bg-green-50"
+          iconBg="bg-green-500"
+          index={1}
+        />
+
+        <SchoolAdminStatCard
+          title="Total Teachers"
+          value={stats.totalTeachers}
+          icon={<GraduationCap size={90} className="text-black" />}
+          bg="bg-purple-50"
+          iconBg="bg-purple-500"
+          index={2}
+        />
+
+        <SchoolAdminStatCard
+          title="Upcoming Workshops"
+          value={stats.upcomingWorkshops}
+          icon={<CalendarDays size={90} className="text-black" />}
+          bg="bg-orange-50"
+          iconBg="bg-orange-500"
+          index={3}
+        />
+
+        <SchoolAdminStatCard
+          title="Fees Collected"
+          value={`₹${(stats.feesCollected / 100000).toFixed(1)}L`}
+          icon={<IndianRupee size={90} className="text-black" />}
+          bg="bg-emerald-50"
+          iconBg="bg-emerald-500"
+          index={4}
+        />
       </div>
 
       {/* Attendance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <AttendanceCard
+        <SchoolAdminAttendanceCard
           title="Student Attendance"
-          percent={83}
-          meta="Present: 378 | Absent: 78"
+          percent={attendance.student.percent}
+          meta={`Present: ${attendance.student.present} | Absent: ${attendance.student.absent}`}
         />
-        <AttendanceCard
+
+        <SchoolAdminAttendanceCard
           title="Teacher Leave"
-          percent={13}
-          meta="On Leave: 4 | Present: 28"
+          percent={attendance.teacher.percent}
+          meta={`On Leave: ${attendance.teacher.onLeave} | Present: ${attendance.teacher.present}`}
         />
       </div>
 
-      {/* Bottom section */}
+      {/* Bottom */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <WorkshopsCard />
-        <NewsCard />
-      </div>
-    </div>
-  );
-}
-
-function StatCard({
-  title,
-  value,
-}: {
-  title: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl p-4 bg-white shadow-sm">
-      <p className="text-sm text-gray-500">{title}</p>
-      <h2 className="text-2xl font-semibold mt-2">{value}</h2>
-    </div>
-  );
-}
-function AttendanceCard({
-  title,
-  percent,
-  meta,
-}: {
-  title: string;
-  percent: number;
-  meta: string;
-}) {
-  return (
-    <div className="bg-white rounded-xl p-6 shadow-sm flex items-center gap-6">
-      <div className="w-24 h-24 rounded-full border-8 border-green-500 flex items-center justify-center">
-        <span className="font-semibold">{percent}%</span>
-      </div>
-
-      <div>
-        <h3 className="font-medium">{title}</h3>
-        <p className="text-sm text-gray-500">{meta}</p>
-      </div>
-    </div>
-  );
-}
-function WorkshopsCard() {
-  return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
-      <h3 className="font-medium mb-3">Upcoming Workshops</h3>
-
-      <div className="border rounded-lg p-3">
-        <p className="font-medium">Hackathon 2024</p>
-        <p className="text-sm text-gray-500">
-          March 15, 2024 • Class 10
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function NewsCard() {
-  return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
-      <h3 className="font-medium mb-3">Latest News</h3>
-
-      <div className="border rounded-lg p-3">
-        <p className="font-medium">
-          Annual Sports Day 2024 - A Grand Success!
-        </p>
-        <p className="text-sm text-gray-500">2 days ago</p>
+        <SchoolAdminWorkshopCard workshops={workshops} />
+        <SchoolAdminNewsFeedCard news={news} />
       </div>
     </div>
   );

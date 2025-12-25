@@ -21,7 +21,7 @@ export default function InputField({
 }: InputFieldProps) {
   return (
     <div className="space-y-2">
-      <label className="text-sm text-black">{label}</label>
+      <label style={{color: isBorderBlack?'black':'white'}} className="text-sm text-black">{label}</label>
 
       <div className="relative">
         <input
