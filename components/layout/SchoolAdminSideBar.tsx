@@ -2,12 +2,18 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { MAIN_COLOR } from "@/constants/colors";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { SidebarItem } from "@/constants/schooladmin/sidebar";
+import BrandLogo from "../ui/common/BrandLogo";
+
+const ANIMATE_BG = "#BFE6B0";
+const FINAL_BG = "#D6F0C8";
+const ACTIVE_TEXT = "#43b771";
 
 export default function SchoolAdminSideBar({
   menuItems,
-  onClose, // used for mobile drawer
+  onClose,
 }: {
   menuItems: SidebarItem[];
   onClose?: () => void;
@@ -15,6 +21,25 @@ export default function SchoolAdminSideBar({
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "dashboard";
+  const [schoolName, setSchoolName] = useState<string>("Loading...");
+
+  useEffect(() => {
+    const fetchSchool = async () => {
+      const res = await fetch("/api/school/mine", {
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      console.log(data);
+
+      if (data?.school?.name) {
+        setSchoolName(data.school.name);
+      }
+    };
+
+    fetchSchool();
+  }, []);
+
 
   const handleClick = async (item: SidebarItem) => {
     if (item.action === "logout") {
@@ -24,40 +49,113 @@ export default function SchoolAdminSideBar({
 
     if (item.href) {
       router.push(item.href);
-      onClose?.(); // close drawer on mobile
+      onClose?.();
     }
   };
 
   return (
-    <aside className="w-64 bg-white h-full px-3 py-4">
-      {menuItems.map((item) => {
-        const isActive = item.tab === activeTab;
-        const Icon = item.icon;
+    <aside className="relative w-64 bg-white h-full flex flex-col border-r border-gray-300">
+      
+      {/* 🔝 TOP PROFILE / BRAND */}
+      <div className="px-4 py-5 flex items-center gap-3 border-b border-gray-200">
+        <div className="w-10 h-10 rounded-full bg-[#43b771] flex items-center justify-center text-white font-bold">
+          SA
+        </div>
+        <div>
+          <p className="font-semibold text-sm text-gray-900">
+            SchoolAdmin
+          </p>
+          <p className="text-xs text-gray-500">
+            Management System
+          </p>
+        </div>
+      </div>
 
-        return (
-          <button
-            key={item.label}
-            onClick={() => handleClick(item)}
-            className={`
-              w-full flex items-center gap-3 px-4 py-3 mb-2 rounded-xl
-              text-sm font-medium transition
-              ${
-                isActive
-                  ? "text-white shadow-md"
-                  : "text-gray-500 hover:bg-gray-100"
-              }
-            `}
-            style={isActive ? { backgroundColor: MAIN_COLOR } : undefined}
-          >
-            <Icon
-              className={`text-lg ${
-                isActive ? "text-white" : "text-gray-400"
-              }`}
-            />
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
-    </aside>
+      {/* 🧭 SIDEBAR MENU */}
+      <div className="flex-1 px-3 py-4 overflow-y-auto">
+        {menuItems.map((item) => {
+          const isActive = item.tab === activeTab;
+          const Icon = item.icon;
+
+          return (
+            <motion.button
+              key={item.label}
+              onClick={() => handleClick(item)}
+              whileHover={{ x: 3, scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
+              animate={{ scale: isActive ? 1.06 : 1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="relative w-full mb-2 overflow-hidden rounded-xl"
+            >
+              {isActive && (
+                <div className="absolute inset-0 bg-[#D6F0C8]" />
+              )}
+
+              {isActive && (
+                <motion.div
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                  style={{ originY: 0 }}
+                  className="absolute inset-0 bg-[#BFE6B0]"
+                />
+              )}
+
+              <div
+                className={`
+                  relative z-10 flex items-center gap-3 px-4 py-3
+                  text-sm font-medium
+                  ${
+                    isActive
+                      ? "shadow-md"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }
+                `}
+              >
+                <Icon
+                  className="text-lg"
+                  style={{
+                    color: isActive ? ACTIVE_TEXT : "#9ca3af",
+                  }}
+                />
+                <span
+                  style={{
+                    color: isActive ? ACTIVE_TEXT : "#6b7280",
+                  }}
+                >
+                  {item.label}
+                </span>
+              </div>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* 🔽 BOTTOM ADMIN PROFILE */}
+      <div className="px-4 py-4 border-t border-gray-300 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-[#43b771] text-white flex items-center justify-center text-sm font-semibold">
+          AD
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-900">
+            {schoolName}
+          </p>
+          <p className="text-xs text-gray-500">
+            School Admin
+          </p>
+        </div>
+      </div>
+
+      {/* 🔻 BRAND LOGO */}
+      <div className="border-t border-gray-100">
+        <div className="h-14 w-full overflow-hidden px-4 flex items-center">
+          <div className="-ml-8 scale-[0.9]">
+            <BrandLogo isbrandLogoWhite={false} />
+          </div>
+        </div>
+      </div>
+
+    <div className="pointer-events-none absolute top-0 -right-6 h-full w-6 bg-gradient-to-r from-gray-300/40 via-gray-200/20 to-transparent" />
+  </aside>
   );
 }
