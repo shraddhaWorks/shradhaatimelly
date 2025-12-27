@@ -8,6 +8,7 @@ interface DynamicFormProps {
   submitLabel: string;
   onSubmit: (values: Record<string, any>) => Promise<void> | void;
   initialValues?: Record<string, any>;
+  onSuccess?: () => void;
 }
 
 export default function DynamicForm({
@@ -15,6 +16,7 @@ export default function DynamicForm({
   submitLabel,
   onSubmit,
   initialValues = {},
+  onSuccess,
 }: DynamicFormProps) {
   const [values, setValues] = useState<Record<string, any>>(initialValues);
   const [submitting, setSubmitting] = useState(false);

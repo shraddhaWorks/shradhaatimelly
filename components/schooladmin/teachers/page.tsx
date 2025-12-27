@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CommonModal from "@/components/ui/models/CommonModel";
-import { getTeachers } from "@/services/schooladmin/teachers.service";
 import DataTable, { Column } from "@/components/ui/TableData";
 import CommonButton from "@/components/ui/common/CommonButton";
 import { Teacher } from "@/interfaces/dashboard";
@@ -12,27 +11,13 @@ import TeacherMobileCard from "@/components/responsivescreens/schooladmin/Teache
 import DynamicForm from "@/components/ui/models/DynamicForm";
 import { addTeacherFields } from "@/constants/schooladmin/addTeacherForm";
 
-export default function TeachersPage() {
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [loading, setLoading] = useState(true);
+
+export default function TeachersPage({teachers,reload,loading}:{
+  teachers:Teacher[];
+  loading:boolean;
+  reload:()=>void;
+}   ) {
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    fetchTeachers();
-  }, []);
-
-  const fetchTeachers = async () => {
-    try {
-      setLoading(true);
-      const res = await getTeachers();
-      const data = await res.json();
-      setTeachers(data.teachers || []);
-    } catch (error) {
-      console.error("Failed to load teachers", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddTeacher = async (formData: Record<string, any>) => {
     try {
@@ -49,7 +34,7 @@ export default function TeachersPage() {
       }
 
       setOpen(false);
-      fetchTeachers();
+      reload();
     } catch (error) {
       console.error("Add teacher error:", error);
     }
@@ -134,6 +119,10 @@ export default function TeachersPage() {
           fields={addTeacherFields}
           submitLabel="Add Teacher"
           onSubmit={handleAddTeacher}
+          onSuccess={() => {
+            setOpen(false);
+            reload();
+          }}
         />
       </CommonModal>
 
