@@ -26,22 +26,40 @@ export async function GET() {
     });
 
     const totalStudents = classes.reduce((acc, c) => acc + c._count.students, 0);
+    const classIds = classes.map((c) => c.id);
 
-    const classIds = classes.map(c => c.id);
-
-    // 2️⃣ Events
-    const events = await prisma.event.findMany({
+    // 2️⃣ Events (teacher + classes + school-wide)
+    const eventsRaw = await prisma.event.findMany({
       where: {
         schoolId,
         OR: [
           { teacherId },
           ...(classIds.length ? [{ classId: { in: classIds } }] : []),
-          { classId: null }, // school-wide
+          { classId: null }, // school-wide events
         ],
+      },
+      include: {
+        class: { select: { id: true, name: true, section: true } },
+        teacher: { select: { id: true, name: true, email: true } },
+        _count: { select: { registrations: true } },
       },
       orderBy: { createdAt: "desc" },
       take: 5,
     });
+
+    // Include registration info for teacher if needed (optional for dashboard)
+    // For teachers, we can also skip this, but if you want to show registered students count:
+    const events = await Promise.all(
+      eventsRaw.map(async (event) => {
+        const registrations = await prisma.eventRegistration.count({
+          where: { eventId: event.id },
+        });
+        return {
+          ...event,
+          registrationsCount: registrations,
+        };
+      })
+    );
 
     // 3️⃣ Appointments (PENDING)
     const appointments = await prisma.appointment.findMany({
@@ -65,11 +83,11 @@ export async function GET() {
         totalClasses: classes.length,
         totalStudents,
         pendingAppointments: appointments.length,
-        unreadMessages: appointments.length,
+        unreadMessages: appointments.length, // can be updated if real messages exist
       },
       classes,
       events,
-      appointments: appointments.map(a => ({
+      appointments: appointments.map((a) => ({
         ...a,
         studentName: a.student.user.name,
       })),
