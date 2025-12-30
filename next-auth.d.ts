@@ -8,6 +8,7 @@ declare module "next-auth" {
     schoolId?: string | null;
     mobile?: string | null;
     studentId?: string | null;
+    subjectsTaught?: string | null;
   }
 
   interface Session {
@@ -17,7 +18,9 @@ declare module "next-auth" {
       schoolId?: string | null;
       mobile?: string | null;
       studentId?: string | null;
+      subjectsTaught?: string | null;
     } & DefaultSession["user"];
+
   }
 }
 
@@ -28,5 +31,6 @@ declare module "next-auth/jwt" {
     schoolId?: string | null;
     mobile?: string | null;
     studentId?: string | null;
+    subjectsTaught?: string | null;
   }
 }

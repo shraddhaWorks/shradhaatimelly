@@ -61,6 +61,7 @@ export const authOptions: NextAuthOptions = {
             schoolId: user.schoolId,
             mobile: user.mobile,
             studentId: user.student?.id ?? null,
+            subjectsTaught: user.subjectsTaught,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -83,6 +84,7 @@ export const authOptions: NextAuthOptions = {
       token.schoolId = user.schoolId;
       token.mobile = user.mobile;
       token.studentId = user.studentId;
+      token.subjectsTaught = (user as any).subjectsTaught; 
     }
 
     // 🔥 IMPORTANT: keep schoolId always in sync
@@ -116,7 +118,7 @@ export const authOptions: NextAuthOptions = {
       schoolId: token.schoolId as string | null,
       mobile: token.mobile as string | null,
       studentId: token.studentId as string | null,
-    };
+      subjectsTaught: token.subjectsTaught as string | null,};
 
     return session;
   },
