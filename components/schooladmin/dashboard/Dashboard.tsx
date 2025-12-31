@@ -61,45 +61,45 @@ export default function DashboardTab({
         <SchoolAdminStatCard
           title="Total Classes"
           value={stats.totalClasses}
-          icon={<BookOpen size={90} className="text-black" />}
-          bg="bg-blue-50"
-          iconBg="bg-blue-500"
+          icon={<BookOpen size={30} className="text-black" />}
+          bg="bg-gradient-to-br from-white via-white to-blue-100"
+          iconBg="bg-blue-50"
           index={0}
         />
 
         <SchoolAdminStatCard
           title="Total Students"
           value={stats.totalStudents}
-          icon={<Users size={90} className="text-black" />}
-          bg="bg-green-50"
-          iconBg="bg-green-500"
+          icon={<Users size={30} className="text-black" />}
+          bg="bg-gradient-to-br from-white via-white to-green-100"
+          iconBg="bg-green-50"
           index={1}
         />
 
         <SchoolAdminStatCard
           title="Total Teachers"
           value={stats.totalTeachers}
-          icon={<GraduationCap size={90} className="text-black" />}
-          bg="bg-purple-50"
-          iconBg="bg-purple-500"
+          icon={<GraduationCap size={30} className="text-black" />}
+          bg="bg-gradient-to-br from-white via-white to-purple-100"
+          iconBg="bg-purple-50"
           index={2}
         />
 
         <SchoolAdminStatCard
           title="Upcoming Workshops"
           value={stats.upcomingWorkshops}
-          icon={<CalendarDays size={90} className="text-black" />}
-          bg="bg-orange-50"
-          iconBg="bg-orange-500"
+          icon={<CalendarDays size={30} className="text-black" />}
+          bg="bg-gradient-to-br from-white via-white to-orange-100"
+          iconBg="bg-orange-50"
           index={3}
         />
 
         <SchoolAdminStatCard
           title="Fees Collected"
           value={`₹${(stats.feesCollected / 100000).toFixed(1)}L`}
-          icon={<IndianRupee size={90} className="text-black" />}
-          bg="bg-emerald-50"
-          iconBg="bg-emerald-500"
+          icon={<IndianRupee size={30} className="text-black" />}
+          bg="bg-gradient-to-br from-white via-white to-emerald-100"
+          iconBg="bg-emerald-50"
           index={4}
         />
       </div>

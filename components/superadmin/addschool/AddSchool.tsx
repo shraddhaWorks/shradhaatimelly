@@ -10,14 +10,33 @@ import { EDUCATION_BOARDS } from "@/constants/boards";
 import { MAIN_COLOR } from "@/constants/colors";
 import { SchoolFormState } from "@/interfaces/dashboard";
 
+
+/* ---------------- Types ---------------- */
+
 type FormErrors = {
   schoolName?: string;
   password?: string;
   email?: string;
 };
 
+/* ---------------- Helper ---------------- */
+
+// 🔹 Convert image file → Base64 string
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+/* ---------------- Component ---------------- */
+
 export default function AddSchoolPage() {
   const router = useRouter();
+
+  /* ---------------- Form State ---------------- */
 
   const [form, setForm] = useState<SchoolFormState>({
     schoolName: "",
@@ -39,21 +58,30 @@ export default function AddSchoolPage() {
   const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
-  /* -------- Logo Upload -------- */
+  /* ---------------- Logo Upload ---------------- */
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoBase64, setLogoBase64] = useState<string | null>(null);
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files && e.target.files[0]) {
-      setLogoFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setLogoFile(file);
+
+      const base64 = await fileToBase64(file);
+      setLogoBase64(base64);
     }
   };
 
-  /* -------- Input Handler -------- */
+  /* ---------------- Input Handler ---------------- */
+
   const handleChange =
     (field: keyof SchoolFormState) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +89,8 @@ export default function AddSchoolPage() {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     };
 
-  /* -------- Validation -------- */
+  /* ---------------- Validation ---------------- */
+
   const validateForm = () => {
     const newErrors: FormErrors = {};
 
@@ -83,41 +112,70 @@ export default function AddSchoolPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  /* -------- Submit Handler -------- */
+  /* ---------------- Submit Handler ---------------- */
+
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
+  setLoading(true);
 
-    setLoading(true);
+  try {
+    /* ---------------- 1. Create School Admin ---------------- */
+    const userRes = await fetch("/api/admin/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.schoolName,
+        email: form.email,
+        password: form.password,
+        role: "SCHOOLADMIN",
+      }),
+    });
 
-    try {
-      const res = await fetch("/api/admin/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.schoolName,
-          email: form.email,
-          password: form.password,
-          role: "SCHOOLADMIN",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Signup failed");
-        return;
-      }
-
-      setShowSuccess(true);
-    } catch {
-      setError("Something went wrong");
-    } finally {
-      setLoading(false);
+    const userData = await userRes.json();
+    if (!userRes.ok) {
+      setError(userData.message || "Failed to create school admin");
+      return;
     }
-  };
+
+    const schoolAdminId = userData.user.id;
+
+    /* ---------------- 2. Create School (POST) ---------------- */
+    const schoolRes = await fetch("/api/school/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.schoolName,
+        address: form.addressLine,
+        location: form.area,
+        icon: logoBase64,
+        pincode: form.pincode,
+        district: form.district,
+        state: form.state,
+        city: form.city,
+
+        schoolAdminId,
+      }),
+    });
+
+    const schoolData = await schoolRes.json();
+    if (!schoolRes.ok) {
+      setError(schoolData.message || "Failed to create school");
+      return;
+    }
+
+    setShowSuccess(true);
+  } catch (err) {
+    setError("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  /* ---------------- Reset ---------------- */
 
   const handleReset = () => {
     setForm({
@@ -134,9 +192,13 @@ export default function AddSchoolPage() {
       district: "",
       state: "",
     });
+
     setErrors({});
     setLogoFile(null);
+    setLogoBase64(null);
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
     <>
@@ -148,7 +210,11 @@ export default function AddSchoolPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Add New School</h1>
           <div className="flex gap-3">
-            <button type="button" onClick={handleReset} className="text-gray-500">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="text-gray-500"
+            >
               Reset
             </button>
 
@@ -175,7 +241,9 @@ export default function AddSchoolPage() {
               onChange={handleChange("schoolName")}
             />
             {errors.schoolName && (
-              <p className="text-red-500 text-sm mt-1">{errors.schoolName}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.schoolName}
+              </p>
             )}
           </div>
 
@@ -188,7 +256,9 @@ export default function AddSchoolPage() {
               onChange={handleChange("password")}
             />
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.password}
+              </p>
             )}
           </div>
         </FormSection>
@@ -212,7 +282,9 @@ export default function AddSchoolPage() {
                 onChange={handleChange("email")}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email}
+                </p>
               )}
             </div>
           </div>
@@ -231,7 +303,10 @@ export default function AddSchoolPage() {
               label="Board of Education"
               value={form.board}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, board: e.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  board: e.target.value,
+                }))
               }
               options={EDUCATION_BOARDS}
               placeholder="Select Board"
@@ -242,12 +317,42 @@ export default function AddSchoolPage() {
         {/* Address Details */}
         <FormSection title="Address Details">
           <div className="grid grid-cols-2 gap-6">
-            <InputField label="Address Line" value={form.addressLine} onChange={handleChange("addressLine")} placeholder={""} />
-            <InputField label="Pincode" value={form.pincode} onChange={handleChange("pincode")} placeholder={""} />
-            <InputField label="Area / Locality" value={form.area} onChange={handleChange("area")} placeholder={""} />
-            <InputField label="City" value={form.city} onChange={handleChange("city")} placeholder={""} />
-            <InputField label="District" value={form.district} onChange={handleChange("district")} placeholder={""} />
-            <InputField label="State" value={form.state} onChange={handleChange("state")} placeholder={""} />
+            <InputField
+              label="Address Line"
+              value={form.addressLine}
+              onChange={handleChange("addressLine")}
+              placeholder=""
+            />
+            <InputField
+              label="Pincode"
+              value={form.pincode}
+              onChange={handleChange("pincode")}
+              placeholder=""
+            />
+            <InputField
+              label="Area / Locality"
+              value={form.area}
+              onChange={handleChange("area")}
+              placeholder=""
+            />
+            <InputField
+              label="City"
+              value={form.city}
+              onChange={handleChange("city")}
+              placeholder=""
+            />
+            <InputField
+              label="District"
+              value={form.district}
+              onChange={handleChange("district")}
+              placeholder=""
+            />
+            <InputField
+              label="State"
+              value={form.state}
+              onChange={handleChange("state")}
+              placeholder=""
+            />
           </div>
         </FormSection>
 
@@ -266,7 +371,9 @@ export default function AddSchoolPage() {
           </div>
 
           <p className="text-sm text-gray-600 mb-2">
-            {logoFile ? `Selected file: ${logoFile.name}` : "Drop your Logo to upload"}
+            {logoFile
+              ? `Selected file: ${logoFile.name}`
+              : "Drop your Logo to upload"}
           </p>
 
           <button
@@ -281,7 +388,7 @@ export default function AddSchoolPage() {
 
       <SuccessPopup
         open={showSuccess}
-        title="School Created Successfully!"
+        title="School Created and Onboarded Successfully!"
         onClose={() => {
           setShowSuccess(false);
           handleReset();

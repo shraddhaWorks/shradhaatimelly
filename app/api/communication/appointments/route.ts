@@ -17,35 +17,46 @@ export async function GET() {
 
     let where: any = {};
 
-  if (role === "STUDENT") {
-    if (!session.user.studentId) {
-      return NextResponse.json(
-        { message: "Student profile not found" },
-        { status: 400 }
-      );
+    if (role === "STUDENT") {
+      if (!session.user.studentId) {
+        return NextResponse.json({ message: "Student profile not found" }, { status: 400 });
+      }
+      where.studentId = session.user.studentId;
+    } else if (role === "TEACHER") {
+      where.teacherId = userId;
+    } else {
+      return NextResponse.json({ message: "Only students or teachers can view appointments", status: 403 });
     }
-    where.studentId = session.user.studentId;
-  } else if (role === "TEACHER") {
-    where.teacherId = userId;
-  } else {
-    return NextResponse.json(
-      { message: "Only students or teachers can view appointments" },
-      { status: 403 }
-    );
-  }
 
     const appointments = await prisma.appointment.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: { name: true }
+            },
+            class: { select: { name: true } }
+          }
+        },
+        teacher: {
+          select: { name: true } // optional, in case you want teacher name too
+        }
+      }
     });
 
-    return NextResponse.json({ appointments });
+    // Map studentName to top level for frontend convenience
+    const formatted = appointments.map(a => ({
+      ...a,
+      studentName: a.student.user.name || "Student", // fallback
+      studentClass: a.student.classId || "Class Not Set"
+    }));
+
+    return NextResponse.json({ appointments: formatted });
   } catch (error: any) {
     console.error("List appointments error:", error);
-    return NextResponse.json(
-      { message: error?.message || "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: error?.message || "Internal server error" }, { status: 500 });
   }
 }
 

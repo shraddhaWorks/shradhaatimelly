@@ -7,41 +7,39 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
+    /* ---------- Auth ---------- */
     if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
+    if (session.user.role !== "SUPERADMIN") {
+      return NextResponse.json(
+        { message: "Only super admin can create schools" },
+        { status: 403 }
+      );
+    }
 
-    const { name, address, location ,icon,pincode,district,state,city } = await req.json();
+    /* ---------- Body ---------- */
+    const {
+      name,
+      address,
+      location,
+      icon,
+      pincode,
+      district,
+      state,
+      city,
+      schoolAdminId, // 👈 important
+    } = await req.json();
 
     if (!name || !address || !location || !pincode || !district || !state || !city) {
       return NextResponse.json(
-        { message: "Name, Address, and Location are required" },
+        { message: "All required fields must be provided" },
         { status: 400 }
       );
     }
 
-    // 🔹 Check if admin already has a school
-    const existingSchool = await prisma.school.findFirst({
-      where: {
-        admins: {
-          some: { id: session.user.id },
-        },
-      },
-    });
-
-    if (existingSchool) {
-      return NextResponse.json(
-        {
-          message:
-            "You already created a school. You can only update it, not create a new one.",
-          school: existingSchool,
-        },
-        { status: 400 }
-      );
-    }
-
-    // 🔹 Create school
+    /* ---------- Create School ---------- */
     const school = await prisma.school.create({
       data: {
         name,
@@ -52,24 +50,24 @@ export async function POST(req: Request) {
         district,
         state,
         city,
-        admins: {
-          connect: { id: session.user.id },
-        },
+        admins: schoolAdminId
+          ? { connect: { id: schoolAdminId } }
+          : undefined,
       },
-      include: { admins: true },
     });
 
-    // 🔹 Update user's schoolId
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { schoolId: school.id },
-    });
+    /* ---------- Attach schoolId to School Admin ---------- */
+    if (schoolAdminId) {
+      await prisma.user.update({
+        where: { id: schoolAdminId },
+        data: { schoolId: school.id },
+      });
+    }
 
     return NextResponse.json(
       { message: "School created successfully", school },
       { status: 201 }
     );
-
   } catch (error) {
     console.error("Create school error:", error);
     return NextResponse.json(

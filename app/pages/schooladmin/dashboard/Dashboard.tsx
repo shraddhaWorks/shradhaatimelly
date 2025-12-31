@@ -16,6 +16,7 @@ import FeePaymentsPage from "@/components/schooladmin/schoolpayments/SchoolPayem
 import SchoolAdminClassesPage from "@/components/schooladmin/classes/Classes";
 import WorkshopsPage from "@/components/schooladmin/workshops/WorkShops";
 import AnalysisClient from "@/components/schooladmin/analysis/Analysis";
+import NewsfeedPage from "@/components/schooladmin/newsfeed/Newsfeed";
 
 export default function SchoolAdminLayout() {
   const [open, setOpen] = useState(false);
@@ -94,13 +95,9 @@ export default function SchoolAdminLayout() {
           />
         );
       case "workshops":
-        return (
-          <WorkshopsPage
-            workshops={events}
-            loading={loading}
-            reload={reloadDashboard}
-          />
-        );
+        return <WorkshopsPage workshops={events} loading={loading} reload={reloadDashboard} />;
+      case "newsfeed":
+        return <NewsfeedPage />;
       case "analysis":
         return <AnalysisClient />;
       default:

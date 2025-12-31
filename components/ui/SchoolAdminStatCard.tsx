@@ -37,8 +37,10 @@ export default function SchoolAdminStatCard({
       </div>
 
       {/* 🌫️ Large faded background icon */}
-      <div className="absolute -bottom-6 -right-6 text-gray-300 opacity-30 pointer-events-none text-[90px]">
-        {icon}
+      <div className="flex items-center justify-center w-10 h-10 rounded-xl">
+        <div className={`h-10 h-10 text-gray-700 ${iconBg} rounded-full flex items-center justify-center p-2`}>
+          {icon}
+        </div>
       </div>
 
       {/* Content */}

@@ -1,8 +1,9 @@
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, DefaultSession, DefaultUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { Role } from "@/app/generated/prisma";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -27,7 +28,12 @@ export const authOptions: NextAuthOptions = {
             include: {
               student: true,
               assignedClasses: true,
-              school: true,
+              school: {
+                select: {
+                  name: true,
+                  icon: true,
+                }
+              },
             },
           });
 
@@ -61,6 +67,9 @@ export const authOptions: NextAuthOptions = {
             schoolId: user.schoolId,
             mobile: user.mobile,
             studentId: user.student?.id ?? null,
+            subjectsTaught: user.subjectsTaught,
+            schoolIcon: user.school?.icon ?? null,
+            schoolName: user.school?.name ?? null, // Added schoolName here
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -75,53 +84,72 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-  async jwt({ token, user }) {
-    // First login
-    if (user) {
-      token.id = user.id;
-      token.role = user.role;
-      token.schoolId = user.schoolId;
-      token.mobile = user.mobile;
-      token.studentId = user.studentId;
-    }
+    async jwt({ token, user }) {
+      // First login
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.schoolId = user.schoolId;
+        token.mobile = user.mobile;
+        token.studentId = user.studentId;
+        token.subjectsTaught = (user as any).subjectsTaught;
+        token.icon = (user as any).schoolIcon; 
+        token.schoolName = (user as any).schoolName; // Added schoolName to token
+      }
 
-    // 🔥 IMPORTANT: keep schoolId always in sync
-    if (token.id && !token.schoolId) {
-      const dbUser = await prisma.user.findUnique({
-        where: { id: token.id as string },
-        select: {
-          schoolId: true,
-          student: { select: { schoolId: true } },
-          adminSchools: { select: { id: true } },
-          teacherSchools: { select: { id: true } },
-        },
-      });
+      // 🔥 IMPORTANT: keep schoolId, icon, and name always in sync without bloating headers
+      if (token.id && (!token.schoolId || !token.icon || !token.schoolName)) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: {
+            schoolId: true,
+            school: { select: { name: true, icon: true } }, 
+            student: { 
+                select: { 
+                    schoolId: true,
+                    school: { select: { name: true, icon: true } }
+                } 
+            },
+            adminSchools: { select: { id: true } },
+            teacherSchools: { select: { id: true } },
+          },
+        });
 
-      token.schoolId =
-        dbUser?.schoolId ??
-        dbUser?.student?.schoolId ??
-        dbUser?.adminSchools?.[0]?.id ??
-        dbUser?.teacherSchools?.[0]?.id ??
-        null;
-    }
+        token.schoolId =
+          dbUser?.schoolId ??
+          dbUser?.student?.schoolId ??
+          dbUser?.adminSchools?.[0]?.id ??
+          dbUser?.teacherSchools?.[0]?.id ??
+          null;
 
-    return token;
+        if (!token.icon) {
+            token.icon = dbUser?.school?.icon ?? dbUser?.student?.school?.icon ?? null;
+        }
+        
+        if (!token.schoolName) {
+            token.schoolName = dbUser?.school?.name ?? dbUser?.student?.school?.name ?? null;
+        }
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      session.user = {
+        ...session.user,
+        id: token.id as string,
+        role: token.role as Role,
+        schoolId: token.schoolId as string | null,
+        mobile: token.mobile as string | null,
+        studentId: token.studentId as string | null,
+        subjectsTaught: token.subjectsTaught as string | null,
+        icon: token.icon as string | null,
+        schoolName: token.schoolName as string | null, // Added schoolName to session
+      };
+
+      return session;
+    },
   },
-
-  async session({ session, token }) {
-    session.user = {
-      ...session.user,
-      id: token.id as string,
-      role: token.role as "SUPERADMIN" | "SCHOOLADMIN" | "TEACHER" | "STUDENT",
-      schoolId: token.schoolId as string | null,
-      mobile: token.mobile as string | null,
-      studentId: token.studentId as string | null,
-    };
-
-    return session;
-  },
-},
-
 
   pages: {
     signIn: "/login",
@@ -129,3 +157,5 @@ export const authOptions: NextAuthOptions = {
 
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+/* ---------------- TYPES ---------------- */

@@ -6,32 +6,71 @@ import prisma from "@/lib/db";
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const { name, address, location ,icon,pincode,district,state,city } = await req.json();
 
-    if (!session)
+    /* ---------- Auth ---------- */
+    if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-
-
-    // Read user's schoolId from primary (optional: read from replica if acceptable)
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    });
-
-    if (!user?.schoolId) {
-      return NextResponse.json(
-        { message: "You have not created a school yet" },
-        { status: 400 }
-      );
     }
 
-    // ✅ UPDATE school on primary
+    const {
+      schoolId, // 👈 required only for SUPERADMIN
+      name,
+      address,
+      location,
+      icon,
+      pincode,
+      district,
+      state,
+      city,
+    } = await req.json();
+
+    let targetSchoolId: string | null = null;
+
+    /* ---------- SCHOOL ADMIN ---------- */
+    if (session.user.role === "SCHOOLADMIN") {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { schoolId: true },
+      });
+
+      if (!user?.schoolId) {
+        return NextResponse.json(
+          { message: "You have not created a school yet" },
+          { status: 400 }
+        );
+      }
+
+      targetSchoolId = user.schoolId;
+    }
+
+    /* ---------- SUPER ADMIN ---------- */
+    if (session.user.role === "SUPERADMIN") {
+      if (!schoolId) {
+        return NextResponse.json(
+          { message: "schoolId is required for super admin" },
+          { status: 400 }
+        );
+      }
+      targetSchoolId = schoolId;
+    }
+
+    /* ---------- Update ---------- */
     const updated = await prisma.school.update({
-      where: { id: user.schoolId },
-      data: { name, address, location ,icon,pincode,district,state,city },
+      where: { id: targetSchoolId! },
+      data: {
+        name,
+        address,
+        location,
+        icon,
+        pincode,
+        district,
+        state,
+        city,
+      },
     });
 
     return NextResponse.json(
-      { message: "School updated", updated },
+      { message: "School updated successfully", updated },
       { status: 200 }
     );
   } catch (error) {

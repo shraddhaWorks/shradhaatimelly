@@ -30,6 +30,7 @@ export async function GET() {
         name: true,
         email: true,
         mobile: true,
+        subjectsTaught: true,
       },
       orderBy: {
         name: "asc",

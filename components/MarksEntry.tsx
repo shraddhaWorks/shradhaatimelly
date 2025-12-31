@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Edit2, Trash2 } from "lucide-react";
+import { 
+  Edit2, Trash2, Search, Plus, 
+  X, ChevronDown, Save, User 
+} from "lucide-react";
 
 /* ================= TYPES ================= */
 
@@ -26,45 +29,45 @@ interface Mark {
   grade: string | null;
   suggestions: string | null;
   createdAt: string;
-  class: {
-    id: string; name: string; section: string | null 
-};
-  teacher?: { name: string | null };
+  class: { id: string; name: string; section: string | null };
+  teacher?: { name: string | null; subject?: string };
   student?: { id: string; user: { name: string | null } };
 }
 
-/* ================= PAGE ================= */
-
 export default function MarksPage() {
   const { data: session, status } = useSession();
-const [editingMarkId, setEditingMarkId] = useState<string | null>(null);
-
+  
+  // State
+  const [editingMarkId, setEditingMarkId] = useState<string | null>(null);
   const [classes, setClasses] = useState<Class[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [marks, setMarks] = useState<Mark[]>([]);
-
   const [selectedClass, setSelectedClass] = useState("");
-  const [selectedStudent, setSelectedStudent] = useState("");
-  const [subjectFilter, setSubjectFilter] = useState("");
-
+  const [searchQuery, setSearchQuery] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
+    studentId: "",
     subject: "",
     marks: "",
-    totalMarks: "",
+    totalMarks: "100",
     suggestions: "",
   });
 
-  /* ================= FETCH ================= */
+  const [selectedStudent, setSelectedStudent] = useState("");
+
+  // Teacher Subject Logic
+const teacherSubject = (session?.user as any)?.subjectsTaught ;
+
+  /* ================= FETCHING ================= */
 
   useEffect(() => {
     if (session) {
       fetchMarks();
       if (session.user.role === "TEACHER") fetchClasses();
     }
-  }, [session, subjectFilter]);
+  }, [session]);
 
   useEffect(() => {
     if (selectedClass) fetchStudents();
@@ -73,7 +76,10 @@ const [editingMarkId, setEditingMarkId] = useState<string | null>(null);
   const fetchClasses = async () => {
     const res = await fetch("/api/class/list");
     const data = await res.json();
-    if (res.ok) setClasses(data.classes || []);
+    if (res.ok) {
+      setClasses(data.classes || []);
+      if (data.classes?.length > 0) setSelectedClass(data.classes[0].id);
+    }
   };
 
   const fetchStudents = async () => {
@@ -84,328 +90,265 @@ const [editingMarkId, setEditingMarkId] = useState<string | null>(null);
 
   const fetchMarks = async () => {
     setLoading(true);
-    const url = subjectFilter
-      ? `/api/marks/view?subject=${subjectFilter}`
-      : "/api/marks/view";
-    const res = await fetch(url);
+    const res = await fetch("/api/marks/view");
     const data = await res.json();
     if (res.ok) setMarks(data.marks || []);
     setLoading(false);
   };
 
-  /* ================= SUBMIT ================= */
+  /* ================= HANDLERS ================= */
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const filteredMarks = useMemo(() => {
+    return marks.filter(m => 
+      m.student?.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.subject.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [marks, searchQuery]);
 
-  const payload = {
-    classId: selectedClass,
-    studentId: selectedStudent,
-    subject: form.subject,
-    marks: Number(form.marks),
-    totalMarks: Number(form.totalMarks),
-    suggestions: form.suggestions || null,
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = {
+      classId: selectedClass,
+      studentId: selectedStudent,
+      subject: editingMarkId ? form.subject : teacherSubject, // Locked to teacher subject on create
+      marks: Number(form.marks),
+      totalMarks: Number(form.totalMarks),
+      suggestions: form.suggestions || null,
+    };
+
+    const url = editingMarkId ? `/api/marks/${editingMarkId}` : "/api/marks/create";
+    const method = editingMarkId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      fetchMarks();
+      setShowAdd(false);
+      resetForm();
+    }
   };
 
-  
-  if (editingMarkId) {
-  // Edit existing mark
-  const res = await fetch(`/api/marks/${editingMarkId}`, { // correct REST route
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const resetForm = () => {
+    setForm({ studentId: "", subject: "", marks: "", totalMarks: "100", suggestions: "" });
+    setEditingMarkId(null);
+    setSelectedStudent("");
+  };
 
-  if (res.ok) {
-    fetchMarks();
-    setShowAdd(false);
-    resetForm();
-  } else {
-    const error = await res.json();
-    alert(error.message || "Failed to update mark");
+  const getGradeStyle = (grade: string | null) => {
+    switch (grade) {
+      case 'A+': return 'bg-[#33b663] text-white';
+      case 'A':  return 'bg-[#33b663] text-white';
+      case 'B':  return 'bg-green-200 text-white';
+      case 'C':  return 'bg-yellow-400 text-white';
+      case 'D':  return 'bg-red-400 text-white';
+      default:   return 'bg-gray-300 text-gray-700';
+    }
+  };
+
+  if (status === "loading") return <div className="p-10 text-center">Loading...</div>;
+
+  function handleEdit(m: Mark): void {
+    throw new Error("Function not implemented.");
   }
-} else {
-  // Add new mark
-  const res = await fetch("/api/marks/create", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (res.ok) {
-    fetchMarks();
-    setShowAdd(false);
-    resetForm();
-  } else {
-    const error = await res.json();
-    alert(error.message || "Failed to add mark");
+
+  function handleDelete(id: string): void {
+    throw new Error("Function not implemented.");
   }
-}
-
-};
-
-const resetForm = () => {
-  setForm({ subject: "", marks: "", totalMarks: "", suggestions: "" });
-  setSelectedClass("");
-  setSelectedStudent("");
-  setEditingMarkId(null);
-};
-
-const handleEdit = (mark: Mark) => {
-  setEditingMarkId(mark.id);
-  setSelectedClass(mark.class?.id || "");
-  setSelectedStudent(mark.student?.id || "");
-  setForm({
-    subject: mark.subject,
-    marks: mark.marks.toString(),
-    totalMarks: mark.totalMarks.toString(),
-    suggestions: mark.suggestions || "",
-  });
-  setShowAdd(true);
-};
-
-const handleDelete = async (markId: string) => {
-  if (!confirm("Are you sure you want to delete this mark?")) return;
-
-  const res = await fetch(`/api/marks/${markId}`, { // use markId
-    method: "DELETE",
-  });
-
-  if (res.ok) {
-    fetchMarks(); // refresh table
-  } else {
-    const error = await res.json();
-    alert(error.message || "Failed to delete mark");
-  }
-};
-
-  if (status === "loading") return <p className="p-6">Loading…</p>;
-  if (!session) return <p className="p-6 text-red-600">Unauthorized</p>;
-
-  /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 via-white to-green-200 p-6">
-
+    <div className="min-h-screen bg-[#F8FAFB] p-6 md:p-10">
       {/* HEADER */}
-      <div className="max-w-7xl mx-auto flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-green-700">
-          Marks Management
-        </h1>
+      <div className="max-w-7xl mx-auto mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Student Marks</h1>
+        <p className="text-gray-500 mt-1">View and manage student performance</p>
+      </div>
 
-        {session.user.role === "TEACHER" && (
+      {/* SELECTION BAR */}
+      <div className="max-w-7xl mx-auto bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-end gap-4 mb-8">
+        <div className="w-full md:w-2/3">
+          <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+            Select Class to View Marks
+          </label>
+          <div className="relative">
+            <select
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none appearance-none focus:ring-2 focus:ring-[#33b663]/20"
+            >
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>{c.name} {c.section}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-4 top-4 text-gray-400 pointer-events-none" size={18} />
+          </div>
+        </div>
+
+        {session?.user.role === "TEACHER" && (
           <button
-            onClick={() => setShowAdd(true)}
-            className="px-6 py-2 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:scale-105 transition"
+            onClick={() => { resetForm(); setShowAdd(true); }}
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#33b663] text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-200 active:scale-95"
           >
-            + Add Marks
+            <Plus size={18} /> Add Marks
           </button>
         )}
       </div>
 
-      {/* FILTERS */}
-      <div className="max-w-7xl mx-auto bg-white/70 backdrop-blur rounded-2xl p-4 shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input
-          placeholder="Filter by Subject"
-          value={subjectFilter}
-          onChange={(e) => setSubjectFilter(e.target.value)}
-          className="p-3 rounded-xl border"
-        />
+      {/* TABLE CONTAINER */}
+      <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+          <h2 className="font-bold text-lg text-gray-800">
+            Marks for {classes.find(c => c.id === selectedClass)?.name || "All Classes"}
+          </h2>
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-4 top-3 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search students..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#33b663]/20"
+            />
+          </div>
+        </div>
 
-        <select
-          value={selectedClass}
-          onChange={(e) => setSelectedClass(e.target.value)}
-          className="p-3 rounded-xl border"
-        >
-          <option value="">All Classes</option>
-          {classes.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name} {c.section}
-            </option>
-          ))}
-        </select>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50/50 text-gray-400 text-[11px] uppercase font-bold tracking-widest">
+              <tr>
+                <th className="px-6 py-4">Roll No</th>
+                <th className="px-6 py-4">Student Name</th>
+                <th className="px-6 py-4">Subject</th>
+                <th className="px-6 py-4 text-center">Marks</th>
+                <th className="px-6 py-4 text-center">Total</th>
+                <th className="px-6 py-4 text-center">Grade</th>
+                <th className="px-6 py-4">Date</th>
+                <th className="px-6 py-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filteredMarks.map((m) => (
+                <tr key={m.id} className="hover:bg-gray-50/50 transition-colors group">
+                  <td className="px-6 py-4 text-gray-500 font-medium">#{m.student?.id.slice(-4)}</td>
+                  <td className="px-6 py-4 font-bold text-gray-900">{m.student?.user?.name}</td>
+                  <td className="px-6 py-4 text-gray-600">{m.subject}</td>
+                  <td className="px-6 py-4 text-center font-bold text-[#33b663]">{m.marks}</td>
+                  <td className="px-6 py-4 text-center text-gray-400">{m.totalMarks}</td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[10px] font-black ${getGradeStyle(m.grade)}`}>
+                      {m.grade || "-"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-xs text-gray-400">
+                    {new Date(m.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-2 transition-opacity opacity-100">
+                      <button onClick={() => handleEdit(m)} className="p-2 bg-white text-[#33b663] hover:text-white hover:bg-[#33b663] rounded-lg transition-colors">
+                        <Edit2 size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(m.id)} className="p-2 bg-white text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-colors">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* TABLE */}
-  {/* TABLE */}
-<div className="max-w-7xl mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-xl overflow-hidden">
-  <div className="overflow-x-auto">
-    <table className="w-full table-fixed border-collapse">
-      <thead className="bg-gradient-to-r from-green-600 to-green-700 text-white">
-        <tr>
-          {session.user.role !== "STUDENT" && (
-            <th className="px-4 py-4 text-left w-[14%]">Student</th>
-          )}
-          <th className="px-4 py-4 text-left w-[12%]">Subject</th>
-          <th className="px-4 py-4 text-center w-[8%]">Marks</th>
-          <th className="px-4 py-4 text-center w-[8%]">Total</th>
-          <th className="px-4 py-4 text-center w-[8%]">Grade</th>
-          <th className="px-4 py-4 text-left w-[12%]">Class</th>
-          {session.user.role !== "STUDENT" && (
-            <th className="px-4 py-4 text-left w-[12%]">Teacher</th>
-          )}
-          <th className="px-4 py-4 text-center w-[10%]">Date</th>
-          {session.user.role !== "STUDENT" && (
-            <th className="px-4 py-4 text-center w-[14%]">Actions</th>
-          )}
-        </tr>
-      </thead>
-
-
-{/* TABLE */}
-<tbody className="divide-y divide-green-100">
-  {marks.map((m) => (
-    <tr key={m.id} className="hover:bg-green-50 transition">
-      {session.user.role !== "STUDENT" && (
-        <td className="px-4 py-3 font-medium truncate">{m.student?.user?.name}</td>
-      )}
-      <td className="px-4 py-3 truncate">{m.subject}</td>
-      <td className="px-4 py-3 text-center font-semibold">{m.marks}</td>
-      <td className="px-4 py-3 text-center">{m.totalMarks}</td>
-      <td className="px-4 py-3 text-center">
-        <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
-          {m.grade || "N/A"}
-        </span>
-      </td>
-      <td className="px-4 py-3 truncate">
-        {m.class.name}
-        {m.class.section && ` - ${m.class.section}`}
-      </td>
-      {session.user.role !== "STUDENT" && (
-        <td className="px-4 py-3 truncate">{m.teacher?.name || "—"}</td>
-      )}
-      <td className="px-4 py-3 text-center text-sm text-gray-600">
-        {new Date(m.createdAt).toLocaleDateString()}
-      </td>
-      {session.user.role !== "STUDENT" && (
-        <td className="px-4 py-3 text-center flex justify-center gap-2">
-  <button
-    onClick={() => handleEdit(m)}
-    className="p-2 bg-yellow-400 hover:bg-yellow-500 text-white rounded-xl transition"
-  >
-    <Edit2 size={16} />
-  </button>
-  <button
-    onClick={() => handleDelete(m.id)}
-    className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition"
-  >
-    <Trash2 size={16} />
-  </button>
-</td>
-
-      )}
-    </tr>
-  ))}
-</tbody>
-
-    </table>
-  </div>
-</div>
-
-
-
-      {/* ADD MARKS MODAL */}
+      {/* MODAL */}
       <AnimatePresence>
         {showAdd && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              className="bg-gradient-to-br from-white to-green-100 rounded-3xl shadow-2xl p-6 w-full max-w-md"
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-[32px] shadow-2xl p-8 w-full max-w-md overflow-hidden relative"
             >
-              <h2 className="text-2xl font-bold text-green-700 mb-4 text-center">
-                Add Marks
+              <button onClick={() => setShowAdd(false)} className="absolute right-6 top-6 text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+              
+              <h2 className="text-2xl font-black text-gray-900 mb-8">
+                {editingMarkId ? 'Update Marks' : `Add ${teacherSubject} Marks`}
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <select
-                  required
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full p-3 rounded-xl border"
-                >
-                  <option value="">Select Class</option>
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} {c.section}
-                    </option>
-                  ))}
-                </select>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {!editingMarkId && (
+                  <div className="space-y-4">
+                    <select
+                      required
+                      value={selectedStudent}
+                      onChange={(e) => setSelectedStudent(e.target.value)}
+                      className="w-full p-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none focus:border-[#33b663]"
+                    >
+                      <option value="">Select Student</option>
+                      {students.map((s) => (
+                        <option key={s.id} value={s.id}>{s.user.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
-                <select
-                  required
-                  value={selectedStudent}
-                  onChange={(e) => setSelectedStudent(e.target.value)}
-                  className="w-full p-3 rounded-xl border"
-                >
-                  <option value="">Select Student</option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.user.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Subject</label>
+                    <input
+                      disabled
+                      value={editingMarkId ? form.subject : teacherSubject}
+                      className="w-full p-4 rounded-2xl bg-gray-100 border-none text-gray-500 font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Total Marks</label>
+                    <select
+                      value={form.totalMarks}
+                      onChange={(e) => setForm({ ...form, totalMarks: e.target.value })}
+                      className="w-full p-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none"
+                    >
+                      <option value="100">100</option>
+                      <option value="150">150</option>
+                      <option value="50">50</option>
+                    </select>
+                  </div>
+                </div>
 
-                <input
-                  placeholder="Subject"
-                  required
-                  value={form.subject}
-                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className="w-full p-3 rounded-xl border"
-                />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Obtained Marks</label>
+                  <input
+                    type="number"
+                    required
+                    placeholder="Enter marks"
+                    value={form.marks}
+                    onChange={(e) => setForm({ ...form, marks: e.target.value })}
+                    className="w-full p-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none focus:border-[#33b663] text-lg font-bold"
+                  />
+                </div>
 
-                <input
-                  type="number"
-                  placeholder="Marks"
-                  required
-                  value={form.marks}
-                  onChange={(e) => setForm({ ...form, marks: e.target.value })}
-                  className="w-full p-3 rounded-xl border"
-                />
-
-                <input
-                  type="number"
-                  placeholder="Total Marks"
-                  required
-                  value={form.totalMarks}
-                  onChange={(e) =>
-                    setForm({ ...form, totalMarks: e.target.value })
-                  }
-                  className="w-full p-3 rounded-xl border"
-                />
-
-                <textarea
-                  placeholder="Suggestions"
-                  value={form.suggestions}
-                  onChange={(e) =>
-                    setForm({ ...form, suggestions: e.target.value })
-                  }
-                  className="w-full p-3 rounded-xl border"
-                />
-
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-4 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowAdd(false)}
-                    className="flex-1 py-2 rounded-xl border text-green-700"
+                    className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2 rounded-xl bg-green-600 text-white"
+                    className="flex-1 py-4 rounded-2xl bg-[#33b663] text-white font-bold shadow-lg shadow-green-100 hover:bg-green-700 transition-all"
                   >
-                    Save
+                    Save Marks
                   </button>
                 </div>
               </form>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
