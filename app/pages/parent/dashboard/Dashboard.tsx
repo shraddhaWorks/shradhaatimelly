@@ -9,12 +9,14 @@ import { PARENT_MENU_ITEMS } from "@/constants/parent/sidebar";
 import ParentHomework from "@/components/parent/homework/Homework";
 import ParentAttendance from "@/components/parent/attendance/Attendance";
 import ParentDashboard from "@/components/parent/dashboard/Dashboard";
+import { useParentDashboardData } from "@/hooks/parent/useParentDashboard";
 
 /* Parent pages */
 
 export default function ParentDashboardLayout() {
   const [open, setOpen] = useState(false);
   const tab = useSearchParams().get("tab") ?? "dashboard";
+  const {homeworks,attendanceRaw,loading}=useParentDashboardData()
 
   const renderPage = () => {
     switch (tab) {

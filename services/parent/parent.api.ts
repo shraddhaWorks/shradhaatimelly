@@ -40,4 +40,18 @@ export const parentApi = {
 
   appointments: () =>
     apiJson<{ appointments: any[] }>("/api/communication/appointments"),
+
+  homeworkSubmit: (payload: {
+    homeworkId: string;
+    content?: string;
+    fileUrl?: string;
+  }) =>
+    apiJson<{ message: string; submission: any }>(
+      "/api/homework/submit",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }
+    ),
+
 };
