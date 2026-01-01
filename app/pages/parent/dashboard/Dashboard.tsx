@@ -16,8 +16,7 @@ import { useParentDashboardData } from "@/hooks/parent/useParentDashboard";
 export default function ParentDashboardLayout() {
   const [open, setOpen] = useState(false);
   const tab = useSearchParams().get("tab") ?? "dashboard";
-  
-  const {attendanceStats}=useParentDashboardData();
+  const { attendanceStats } = useParentDashboardData();
 
   const renderPage = () => {
     switch (tab) {

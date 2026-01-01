@@ -1,86 +1,83 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Calendar } from "lucide-react";
+import { parentApi } from "@/services/parent/parent.api";
+import HomeworkSkeleton from "@/components/parent/homework/HomeworkSkeleton";
+import HomeworkCard from "@/components/parent/homework/homeworkcard";
+import { HiSparkles } from "react-icons/hi2";
 
-export default function ParentHomework() {
+export default function HomeworkPage() {
   const [homeworks, setHomeworks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
+[{
+	"resource": "/d:/Timellyschool/shradhaatimelly/app/pages/parent/dashboard/Dashboard.tsx",
+	"owner": "typescript",
+	"code": "2741",
+	"severity": 8,
+	"message": "Property 'homework' is missing in type '{}' but required in type '{ homework: any; }'.",
+	"source": "ts",
+	"startLineNumber": 24,
+	"startColumn": 17,
+	"endLineNumber": 24,
+	"endColumn": 31,
+	"relatedInformation": [
+		{
+			"startLineNumber": 10,
+			"startColumn": 54,
+			"endLineNumber": 10,
+			"endColumn": 62,
+			"message": "'homework' is declared here.",
+			"resource": "/d:/Timellyschool/shradhaatimelly/components/parent/homework/Homework.tsx"
+		}
+	],
+	"origin": "extHost1"
+}]
   useEffect(() => {
-    fetch("/api/homeworks/list", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setHomeworks(data.homeworks || []))
-      .finally(() => setLoading(false));
+    loadHomeworks();
   }, []);
 
-  if (loading) {
-    return <div className="text-gray-500">Loading homework...</div>;
-  }
-
-  if (!homeworks.length) {
-    return (
-      <div className="text-center text-gray-500 mt-10">
-        No homework assigned 🎉
-      </div>
-    );
-  }
+  const loadHomeworks = async () => {
+    try {
+      setLoading(true);
+      const res = await parentApi.homeworks();
+      setHomeworks(res.homeworks || []);
+    } catch (err) {
+      console.error("Failed to load homework", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Homework</h1>
+    <div className="px-4 md:px-8 py-6">
+      {/* Header */}
+      <div className="mb-6">
+        <span className="inline-flex items-center gap-2 text-xs font-medium text-green-700 bg-green-100 px-3 py-1 rounded-full">
+          <HiSparkles className="text-green-600" /> Assignments Overview
+        </span>
 
+        <h1 className="text-2xl md:text-3xl font-bold mt-3">Homework</h1>
+        <p className="text-gray-500 mt-1 text-sm">
+          Track assignments, deadlines, and submission status in one place.
+        </p>
+      </div>
+
+      {/* List */}
       <div className="space-y-4">
-        {homeworks.map((hw, index) => (
-          <motion.div
-            key={hw.id}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition"
-          >
-            {/* Subject + Status */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700">
-                {hw.subject}
-              </span>
-
-              <span
-                className={`text-xs px-3 py-1 rounded-full ${
-                  hw.hasSubmitted
-                    ? "bg-gray-200 text-gray-600"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {hw.hasSubmitted ? "Submitted" : "Pending"}
-              </span>
-            </div>
-
-            {/* Title */}
-            <h2 className="font-semibold text-gray-900">
-              {hw.title}
-            </h2>
-
-            <p className="text-sm text-gray-500 mt-1">
-              {hw.description}
-            </p>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Calendar size={16} />
-                Due: {new Date(hw.dueDate).toLocaleDateString()}
-              </div>
-
-              {!hw.hasSubmitted && (
-                <button className="px-4 py-2 text-sm rounded-lg bg-green-500 text-white hover:bg-green-600 transition">
-                  Submit
-                </button>
-              )}
-            </div>
-          </motion.div>
-        ))}
+        {loading ? (
+          <>
+            <HomeworkSkeleton />
+            <HomeworkSkeleton />
+          </>
+        ) : homeworks.length === 0 ? (
+          <p className="text-center text-gray-500 mt-20">
+            No homework assigned 🎉
+          </p>
+        ) : (
+          homeworks.map((hw) => (
+            <HomeworkCard key={hw.id} homework={hw} />
+          ))
+        )}
       </div>
     </div>
   );
