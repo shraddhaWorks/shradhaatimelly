@@ -44,14 +44,20 @@ export async function GET(req: Request) {
 
     const marks = await prisma.mark.findMany({
       where,
-      select: {
-        id: true,
-        subject: true,
-        marks: true,
-        totalMarks: true,
-        grade: true,
-        studentId: true,
-        classId: true,
+      include: {
+        student: session.user.studentId ? undefined : {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true },
+            },
+          },
+        },
+        class: {
+          select: { id: true, name: true, section: true },
+        },
+        teacher: {
+          select: { id: true, name: true, email: true },
+        },
       },
       orderBy: {
         createdAt: "desc",
