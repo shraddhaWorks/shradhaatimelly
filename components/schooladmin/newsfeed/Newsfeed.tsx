@@ -10,7 +10,6 @@ import { toast } from "@/services/toast/toast.service";
 import { addNewsfeedFields } from "@/constants/schooladmin/createPostForm";
 import { MAIN_COLOR } from "@/constants/colors";
 import { HiSparkles } from "react-icons/hi";
-import { Tag } from "lucide-react";
 
 interface NewsFeed {
     id: string;
@@ -53,7 +52,7 @@ function fileToBase64(file: File): Promise<string> {
     });
 }
 
-export default function NewsfeedPage() {
+export default function NewsfeedPage({mode}:{mode?:string}) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [newsFeeds, setNewsFeeds] = useState<NewsFeed[]>([]);
@@ -121,7 +120,7 @@ export default function NewsfeedPage() {
     return (
         <div className="p-4 sm:p-6 space-y-10">
             {/* ---------- Hero ---------- */}
-            <div className="bg-gradient-to-r from-green-50 via-green-100 to-white border border-green-100 rounded-2xl p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {mode!=="home" && (<div className="bg-gradient-to-r from-green-50 via-green-100 to-white border border-green-100 rounded-2xl p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                        <HiSparkles size={22} style={{ color: MAIN_COLOR }} /> Welcome to Our School Newsfeed
@@ -137,7 +136,7 @@ export default function NewsfeedPage() {
                     icon={<FiPlus />}
                     onClick={() => setOpen(true)}
                 />
-            </div>
+            </div>)}
 
             {/* ---------- Modal ---------- */}
             <CommonModal

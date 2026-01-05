@@ -9,27 +9,39 @@ import {
 } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 
-export default function MobileRadialMenu({ onClose }: { onClose: () => void }) {
+export default function MobileRadialMenu({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const router = useRouter();
 
-  const Item = ({ icon, label, tab }: any) => (
+  const Item = ({
+    icon,
+    label,
+    tab,
+  }: {
+    icon: React.ReactNode;
+    label: string;
+    tab: string;
+  }) => (
     <button
       onClick={() => {
         router.push(`?tab=${tab}`);
         onClose();
       }}
-      className="flex flex-col items-center gap-1 text-xs"
+      className="flex flex-col items-center gap-1"
     >
-      <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+      <div className="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
         {icon}
       </div>
-      {label}
+      <span className="text-xs">{label}</span>
     </button>
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center pb-24">
-      <div className="bg-white rounded-3xl p-6 grid grid-cols-3 gap-6 relative">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end justify-center pb-28">
+      <div className="relative grid grid-cols-3 gap-6 p-6 rounded-3xl bg-white/80 backdrop-blur-xl shadow-xl">
         <Item icon={<FiMessageCircle />} label="Chat" tab="chat" />
         <Item icon={<FiBarChart2 />} label="Marks" tab="marks" />
         <Item icon={<FiAward />} label="Workshops" tab="workshops" />

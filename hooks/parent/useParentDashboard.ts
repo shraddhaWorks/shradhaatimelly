@@ -5,8 +5,7 @@ import { useStudentContext } from "@/context/StudentContext";
 import { parentApi } from "@/services/parent/parent.api";
 import { safeArray } from "../useSchoolAdminDashboard";
 import { api } from "@/services/schooladmin/dashboard/dashboard.api";
-import { set } from "date-fns";
-import { StudentFeeApiResponse } from "@/interfaces/student";
+import { NewsFeed, StudentFeeApiResponse } from "@/interfaces/student";
 
 export function useParentDashboardData() {
   const { activeStudent } = useStudentContext();
@@ -25,9 +24,9 @@ export function useParentDashboardData() {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [fees, setFees] = useState<any>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
-  const [teachers,setTeachers]=useState<any[]>([]);
-  const [feesAllRes,setFeesAllRes]=useState<StudentFeeApiResponse>();
-
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [feesAllRes, setFeesAllRes] = useState<StudentFeeApiResponse>();
+  const [news, setNews] = useState<NewsFeed[]>([]);
 
   /* ---------------- DERIVED STATE ---------------- */
   const [attendanceStats, setAttendanceStats] = useState({
@@ -39,33 +38,33 @@ export function useParentDashboardData() {
 
   /* ---------------- DERIVED CALCULATIONS ---------------- */
 
-const recalculateAttendance = useCallback(() => {
-  const normalized = attendanceRaw.map(a => ({
-    ...a,
-    status: String(a.status).toUpperCase().trim(),
-  }));
+  const recalculateAttendance = useCallback(() => {
+    const normalized = attendanceRaw.map(a => ({
+      ...a,
+      status: String(a.status).toUpperCase().trim(),
+    }));
 
-  const present = normalized.filter(a => a.status === "PRESENT").length;
-  const absent = normalized.filter(a => a.status === "ABSENT").length;
-  const late = normalized.filter(a => a.status === "LATE").length;
+    const present = normalized.filter(a => a.status === "PRESENT").length;
+    const absent = normalized.filter(a => a.status === "ABSENT").length;
+    const late = normalized.filter(a => a.status === "LATE").length;
 
-  const total = normalized.length;
+    const total = normalized.length;
 
-  setAttendanceStats({
-    present,
-    absent,
-    late,
-    percent: total ? Math.round(((present + late) / total) * 100) : 0,
-  });
-}, [attendanceRaw]);
+    setAttendanceStats({
+      present,
+      absent,
+      late,
+      percent: total ? Math.round(((present + late) / total) * 100) : 0,
+    });
+  }, [attendanceRaw]);
 
 
   /* ---------------- LOAD ALL (CORE) ---------------- */
 
   const loadAll = useCallback(async () => {
     if (!activeStudent?.id) {
-    return; 
-  }
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -83,6 +82,7 @@ const recalculateAttendance = useCallback(() => {
         certificatesRes,
         feesRes,
         appointmentsRes,
+        newsRes,
         teachersRes
       ] = await Promise.all([
         parentApi.homeworks(studentId),
@@ -92,8 +92,9 @@ const recalculateAttendance = useCallback(() => {
         parentApi.certificates(studentId),
         parentApi.fees(studentId),
         parentApi.appointments(),
+        parentApi.news(),
         api.teachers()
-      ]); 
+      ]);
 
       setHomeworks(safeArray(homeworkRes?.homeworks));
       setAttendanceRaw(safeArray(attendanceRes?.attendances));
@@ -103,6 +104,7 @@ const recalculateAttendance = useCallback(() => {
       setFees(feesRes?.fee ?? null);
       setFeesAllRes(feesRes as StudentFeeApiResponse);
       setAppointments(safeArray(appointmentsRes?.appointments));
+      setNews(safeArray(newsRes?.news));
       setTeachers(safeArray(teachersRes?.teachers));
     } catch {
       setError({
@@ -116,18 +118,18 @@ const recalculateAttendance = useCallback(() => {
 
   /* ---------------- AUTO LOAD ON STUDENT CHANGE ---------------- */
 
-useEffect(() => {
-  if (activeStudent?.id) {
-    loadAll();
-  }
-}, [activeStudent?.id, loadAll]);
+  useEffect(() => {
+    if (activeStudent?.id) {
+      loadAll();
+    }
+  }, [activeStudent?.id, loadAll]);
 
 
   /* ---------------- AUTO DERIVED ---------------- */
 
-useEffect(() => {
-  recalculateAttendance();
-}, [attendanceRaw, recalculateAttendance]);
+  useEffect(() => {
+    recalculateAttendance();
+  }, [attendanceRaw, recalculateAttendance]);
 
 
   /* ---------------- TAB-LEVEL RELOADS ---------------- */
@@ -174,6 +176,7 @@ useEffect(() => {
     appointments,
     teachers,
     feesAllRes,
+    news,
 
     // derived
     attendanceStats,
