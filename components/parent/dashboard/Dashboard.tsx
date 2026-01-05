@@ -1,31 +1,29 @@
-import { useParentDashboardData } from "@/hooks/parent/useParentDashboard";
-import { motion } from "framer-motion";
+import Newsfeed from "@/components/schooladmin/newsfeed/Newsfeed";
+import ProfileCard from "@/components/ui/common/StudentProfile";
+import { Event } from "@/interfaces/student";
 
 
-export default function ParentDashboard() {
-  const { loading, homeworks, attendanceRaw, events } =
-    useParentDashboardData();
-
-  if (loading) return <p>Loading...</p>;
-
+export default function ParentDashboard({events,attendanceStats}:{events:Event[],attendanceStats:{present:number,absent:number,late:number,percent:number}}) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Stat title="Homework" value={homeworks.length} />
-      <Stat title="Attendance Records" value={attendanceRaw.length} />
-      <Stat title="Workshops" value={events.length} />
+    <div className="space-y-6">
+      
+      {/* PROFILE CARD */}
+      <ProfileCard
+        name="Alex Thompson"
+        username="@class10A"
+        attendance={attendanceStats.present}
+        percentage={attendanceStats.percent}
+        workshops={events.length}
+      />
+
+      {/* NEWSFEED (REUSED COMPONENT) */}
+      <section className="bg-white rounded-3xl p-4 shadow-sm">
+        <h2 className="text-lg font-semibold mb-3">
+          Newsfeed
+        </h2>
+
+        <Newsfeed mode="home" />
+      </section>
     </div>
-  );
-}
-
-function Stat({ title, value }: { title: string; value: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl bg-white p-6 shadow"
-    >
-      <p className="text-sm text-gray-500">{title}</p>
-      <p className="text-2xl font-bold">{value}</p>
-    </motion.div>
   );
 }

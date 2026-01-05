@@ -33,6 +33,8 @@ export default function ParentDashboardLayout() {
     appointments,
     teachers,
     fees,
+    news,
+    events,
     feesAllRes,
     reloadHomework,
     reloadAppointments,
@@ -54,7 +56,7 @@ export default function ParentDashboardLayout() {
       case "certificates":
         return <ParentCertificates />;
       default:
-        return <ParentDashboard />;
+        return <ParentDashboard events={events} attendanceStats={attendanceStats} />;
     }
   };
 
