@@ -20,10 +20,11 @@ import { StudentFeeApiResponse } from "@/interfaces/student";
 import MobileBottomNav from "@/components/ui/parentportal/MobileBottomBar";
 import MobileRadialMenu from "@/components/ui/parentportal/MobileRadialMenu";
 import MobileTopBar from "@/components/ui/parentportal/MobileTopBar";
+import ParentStudentProfile from "@/components/parent/studentparentprofile/ParentStudentProfile ";
 
 
 export default function ParentDashboardLayout() {
-  const tab = useSearchParams().get("tab") ?? "dashboard";
+  const tab = useSearchParams().get("tab") ?? "profile";
   const [radialOpen, setRadialOpen] = useState(false);
 
   const {
@@ -43,6 +44,8 @@ export default function ParentDashboardLayout() {
 
   const renderPage = () => {
     switch (tab) {
+      case "profile":
+        return <ParentStudentProfile />;
       case "homework":
         return <ParentHomework homeworks={homeworks} loading={loading} reloadHomework={reloadHomework} />;
       case "attendance":
@@ -62,7 +65,7 @@ export default function ParentDashboardLayout() {
 
   return (
     <div className="flex h-screen bg-[#f8fafc] overflow-hidden">
-      
+
       {/* ===== DESKTOP SIDEBAR ===== */}
       <aside className="hidden md:block">
         <SchoolAdminSideBar menuItems={PARENT_MENU_ITEMS} />
@@ -70,7 +73,7 @@ export default function ParentDashboardLayout() {
 
       {/* ===== MAIN ===== */}
       <div className="flex-1 flex flex-col relative">
-        
+
         {/* MOBILE TOP BAR */}
         <div className="md:hidden">
           <MobileTopBar />
@@ -87,7 +90,7 @@ export default function ParentDashboardLayout() {
         </div>
 
         {/* RADIAL MENU */}
-        {radialOpen && <MobileRadialMenu onClose={() => setRadialOpen(false)} />}
+        {radialOpen && <MobileRadialMenu onClose={() => setRadialOpen(false)} menuItems={PARENT_MENU_ITEMS} />}
       </div>
     </div>
   );

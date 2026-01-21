@@ -16,14 +16,28 @@ type School = {
   name?: string;
   icon?: string | null;
 };
+type SidebarProps = {
+  menuItems: SidebarItem[];
+  onClose?: () => void;
+
+  /** NEW */
+  profile?: {
+    name: string;
+    subtitle?: string;
+    avatarUrl?: string | null;
+    initials?: string;
+  };
+
+  roleLabel?: string; // "Parent", "Student", "School Admin"
+};
+
 
 export default function SchoolAdminSideBar({
   menuItems,
   onClose,
-}: {
-  menuItems: SidebarItem[];
-  onClose?: () => void;
-}) {
+  profile,
+  roleLabel = "School Admin",
+}: SidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "dashboard";
@@ -119,11 +133,10 @@ export default function SchoolAdminSideBar({
 
               {/* CONTENT */}
               <div
-                className={`relative z-10 flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all ${
-                  isActive
+                className={`relative z-10 flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all ${isActive
                     ? "shadow-md"
                     : "text-gray-500 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <Icon
                   className="text-lg"
@@ -145,15 +158,23 @@ export default function SchoolAdminSideBar({
       </div>
 
       {/* BOTTOM PROFILE */}
-      <div className="px-4 py-4 border-t border-gray-300 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-[#43b771] text-white flex items-center justify-center text-sm font-semibold">
-          AD
+      {profile && (
+        <div className="px-4 py-4 border-t border-gray-300 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#43b771] text-white flex items-center justify-center text-sm font-semibold overflow-hidden">
+            {profile.avatarUrl ? (
+              <img src={profile.avatarUrl} className="w-full h-full object-cover" />
+            ) : (
+              profile.initials ?? "U"
+            )}
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-gray-900">{profile.name}</p>
+            <p className="text-xs text-gray-500">{roleLabel}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-medium text-gray-900">{schoolName}</p>
-          <p className="text-xs text-gray-500">School Admin</p>
-        </div>
-      </div>
+      )}
+
 
       {/* BRAND LOGO */}
       <div className="border-t border-gray-100 h-14 flex items-center px-4">
