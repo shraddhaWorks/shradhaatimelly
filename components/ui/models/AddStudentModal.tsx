@@ -20,6 +20,7 @@ type FormState = {
   email: string;
   fatherName: string;
   aadhaarNo: string;
+  AdmissionNo:string;
   phoneNo: string;
   dob: string;
   address: string;
@@ -39,6 +40,7 @@ export default function AddStudentModal({
     email: "",
     fatherName: "",
     aadhaarNo: "",
+    AdmissionNo:"",
     phoneNo: "",
     dob: "",
     address: "",
@@ -106,6 +108,7 @@ export default function AddStudentModal({
         email: form.email || undefined,
         fatherName: form.fatherName,
         aadhaarNo: form.aadhaarNo,
+        AdmissionNo:form.AdmissionNo,
         phoneNo: form.phoneNo,
         dob: form.dob,
         classId,
@@ -169,6 +172,7 @@ export default function AddStudentModal({
             ["email", "Email"],
             ["fatherName", "Father Name*"],
             ["aadhaarNo", "Aadhaar Number*"],
+            ["AdmissionNo","Admission Number*"],
             ["phoneNo", "Phone Number*"],
             ["dob", "Date of Birth*"],
             ["totalFee", "Total Fee*"],

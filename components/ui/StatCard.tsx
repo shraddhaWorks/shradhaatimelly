@@ -2,7 +2,7 @@ import { LIGHT_BG_COLOR } from "@/constants/colors";
 
 interface StatCardProps {
   title: string;
-  value: number;
+  value: number | string;
   iconBg?: string;
   icon?: React.ReactNode;
 }
@@ -16,12 +16,12 @@ export default function StatCard({
   return (
     <div style={{ backgroundColor: LIGHT_BG_COLOR }} className=" rounded-2xl p-6 flex justify-between items-center">
       <div>
-        <p className="text-3xl font-bold mt-1">{value}</p>
+        <p className="text-1xl font-bold mt-1">{value}</p>
         <p className="text-sm text-gray-600">{title}</p>
       </div>
 
       <div
-        className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${iconBg}`}
+        className={`w-9 h-9 rounded-full flex items-center justify-center text-white ${iconBg}`}
       >
         {icon}
       </div>
