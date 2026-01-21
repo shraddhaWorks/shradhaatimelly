@@ -45,7 +45,7 @@ export default function ProfileCard({
           />
         ) : (
           <div className="w-full h-full bg-green-500 text-white flex items-center justify-center text-2xl font-semibold">
-            {name[0]}
+            {name?.[0] ?? "U"}
           </div>
         )}
       </div>

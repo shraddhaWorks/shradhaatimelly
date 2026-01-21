@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { SidebarItem } from "@/constants/schooladmin/sidebar";
 import BrandLogo from "../ui/common/BrandLogo";
+import { MineSchool } from "@/interfaces/schooladmin";
 
 const ANIMATE_BG = "#BFE6B0"; // falling color
 const FINAL_BG = "#D6F0C8";   // settled color
@@ -17,6 +18,7 @@ type School = {
   icon?: string | null;
 };
 type SidebarProps = {
+  school?: MineSchool;
   menuItems: SidebarItem[];
   onClose?: () => void;
 
@@ -33,6 +35,7 @@ type SidebarProps = {
 
 
 export default function SchoolAdminSideBar({
+  school,
   menuItems,
   onClose,
   profile,
@@ -42,20 +45,6 @@ export default function SchoolAdminSideBar({
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "dashboard";
 
-  const [schoolName, setSchoolName] = useState("Loading...");
-  const [school, setSchool] = useState<School | null>(null);
-
-  useEffect(() => {
-    const fetchSchool = async () => {
-      const res = await fetch("/api/school/mine", { credentials: "include" });
-      const data = await res.json();
-      if (data?.school) {
-        setSchool(data.school);
-        setSchoolName(data.school.name || "School");
-      }
-    };
-    fetchSchool();
-  }, []);
 
   const handleClick = async (item: SidebarItem) => {
     if (item.action === "logout") {
@@ -68,6 +57,7 @@ export default function SchoolAdminSideBar({
       onClose?.();
     }
   };
+  const schoolName = school?.name ?? "School";
 
   return (
     <aside className="relative w-64 bg-white h-full flex flex-col border-r border-gray-300">
@@ -78,7 +68,7 @@ export default function SchoolAdminSideBar({
             <img src={school.icon} className="w-full h-full object-contain" />
           ) : (
             <span className="text-white font-bold">
-              {schoolName?.[0] ?? "S"}
+              {school?.name?.[0] ?? "S"}
             </span>
           )}
         </div>

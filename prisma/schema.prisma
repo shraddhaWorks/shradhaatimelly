@@ -29,6 +29,8 @@ enum LeaveStatus {
 enum LeaveType {
   CASUAL
   SICK
+  PAID
+  UNPAID
 }
 
 model User {
@@ -103,7 +105,7 @@ model LeaveRequest {
 
   leaveType LeaveType
   reason    String   @db.Text
-  days     String
+  days     String?
   fromDate DateTime
   toDate   DateTime
 
@@ -126,10 +128,10 @@ model School {
   address  String
   location String
   icon     String? // URL or file path
-  pincode String
-  district String
-  state    String
-  city    String
+  pincode String?
+  district String?
+  state    String?
+  city    String?
   admins   User[]    @relation("SchoolAdmin")
   teachers User[]    @relation("SchoolTeacher")
   students Student[]
@@ -184,7 +186,7 @@ model Student {
   class   Class?  @relation(fields: [classId], references: [id])
 
   // Student Details
-  AdmissionNo String @unique
+  AdmissionNo String? @unique
   fatherName String
   aadhaarNo  String @unique
   phoneNo    String
@@ -306,8 +308,8 @@ model Mark {
   suggestions  String? @db.Text
 
   // 🔑 Exam relation (Admin-defined)
-  examId       String
-  exam         Exam @relation(fields: [examId], references: [id])
+  examId       String?
+  exam   Exam? @relation(fields: [examId], references: [id])
 
   // Relations
   studentId    String
@@ -659,4 +661,3 @@ model Payment {
 
   @@index([studentId])
 }
-

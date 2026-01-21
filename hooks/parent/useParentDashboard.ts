@@ -5,7 +5,9 @@ import { useStudentContext } from "@/context/StudentContext";
 import { parentApi } from "@/services/parent/parent.api";
 import { safeArray } from "../useSchoolAdminDashboard";
 import { api } from "@/services/schooladmin/dashboard/dashboard.api";
-import { NewsFeed, StudentFeeApiResponse } from "@/interfaces/student";
+import { MeContext, NewsFeed, StudentFeeApiResponse } from "@/interfaces/student";
+import { MineSchool } from "@/interfaces/schooladmin";
+import { set } from "date-fns";
 
 export function useParentDashboardData() {
   const { activeStudent } = useStudentContext();
@@ -27,6 +29,8 @@ export function useParentDashboardData() {
   const [teachers, setTeachers] = useState<any[]>([]);
   const [feesAllRes, setFeesAllRes] = useState<StudentFeeApiResponse>();
   const [news, setNews] = useState<NewsFeed[]>([]);
+  const [studentSchoolInfo, setStudentSchoolInfo] = useState<MeContext>();
+  const [schoolMine, setSchoolMine] = useState<MineSchool>();
 
   /* ---------------- DERIVED STATE ---------------- */
   const [attendanceStats, setAttendanceStats] = useState({
@@ -83,7 +87,9 @@ export function useParentDashboardData() {
         feesRes,
         appointmentsRes,
         newsRes,
-        teachersRes
+        studentSchoolInfoRes,
+        teachersRes,
+        schoolMineRes
       ] = await Promise.all([
         parentApi.homeworks(studentId),
         parentApi.attendance(studentId),
@@ -93,7 +99,9 @@ export function useParentDashboardData() {
         parentApi.fees(studentId),
         parentApi.appointments(),
         parentApi.news(),
-        api.teachers()
+        parentApi.me(),
+        api.teachers(),
+        api.mySchool()
       ]);
 
       setHomeworks(safeArray(homeworkRes?.homeworks));
@@ -105,7 +113,9 @@ export function useParentDashboardData() {
       setFeesAllRes(feesRes as StudentFeeApiResponse);
       setAppointments(safeArray(appointmentsRes?.appointments));
       setNews(safeArray(newsRes?.news));
+      setStudentSchoolInfo(studentSchoolInfoRes?.me);
       setTeachers(safeArray(teachersRes?.teachers));
+      setSchoolMine(schoolMineRes?.school);
     } catch {
       setError({
         message: "Failed to load parent dashboard data",
@@ -180,6 +190,8 @@ export function useParentDashboardData() {
 
     // derived
     attendanceStats,
+    schoolMine,
+    studentSchoolInfo,
 
     // reloads
     reloadAll: loadAll,
