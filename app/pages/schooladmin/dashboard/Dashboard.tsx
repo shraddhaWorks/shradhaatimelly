@@ -19,6 +19,9 @@ import AnalysisClient from "@/components/schooladmin/analysis/Analysis";
 import NewsfeedPage from "@/components/schooladmin/newsfeed/Newsfeed";
 import StudentDetails from "@/components/schooladmin/studentDetails/StudentDetails";
 
+import { MineSchool } from "@/interfaces/schooladmin";
+import ExamsPage from "@/components/schooladmin/exams/exams";
+
 export default function SchoolAdminLayout() {
   const [open, setOpen] = useState(false);
   const tab = useSearchParams().get("tab") ?? "dashboard";
@@ -38,6 +41,7 @@ export default function SchoolAdminLayout() {
     tcRequestsPending,
     feeDetails,
     feeStats,
+    schoolMine,
     reloadDashboard,
     reloadClasses,
     reloadStudents,
@@ -96,9 +100,17 @@ export default function SchoolAdminLayout() {
           />
         );
       case "workshops":
-        return <WorkshopsPage workshops={events} loading={loading} reload={reloadDashboard} />;
+        return (
+          <WorkshopsPage
+            workshops={events}
+            loading={loading}
+            reload={reloadDashboard}
+          />
+        );
       case "newsfeed":
         return <NewsfeedPage />;
+      case "exams":
+        return <ExamsPage />;
       case "analysis":
         return <AnalysisClient />;
       case "student-details":
@@ -122,7 +134,10 @@ export default function SchoolAdminLayout() {
     <div className="flex h-screen overflow-hidden bg-gray-50 animate-dashboard-container bg-[#f8fafc]">
       {/* ========== DESKTOP SIDEBAR ========== */}
       <aside className="hidden md:block">
-        <SchoolAdminSideBar menuItems={SCHOOLADMIN_MENU_ITEMS} />
+        <SchoolAdminSideBar
+          school={schoolMine}
+          menuItems={SCHOOLADMIN_MENU_ITEMS}
+        />
       </aside>
 
       {/* ========== MOBILE SIDEBAR DRAWER ========== */}
@@ -130,6 +145,7 @@ export default function SchoolAdminLayout() {
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div className="w-64 bg-white shadow-lg">
             <SchoolAdminSideBar
+              school={schoolMine as MineSchool}
               menuItems={SCHOOLADMIN_MENU_ITEMS}
               onClose={() => setOpen(false)}
             />

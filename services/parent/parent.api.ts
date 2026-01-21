@@ -1,4 +1,4 @@
-import { NewsFeed } from "@/interfaces/student";
+import { MeContext, NewsFeed } from "@/interfaces/student";
 import { apiJson } from "../api";
 
 // helper – future-proof
@@ -48,6 +48,9 @@ export const parentApi = {
 
   news:()=>
     apiJson<{ news:any}>("/api/newsfeed/list"),
+
+  me:()=>
+    apiJson<{ me: MeContext }>("/api/student/me"),
 
   homeworkSubmit: (payload: {
     homeworkId: string;

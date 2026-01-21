@@ -6,21 +6,18 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { SidebarItem } from "@/constants/schooladmin/sidebar";
 import BrandLogo from "../ui/common/BrandLogo";
+import { MineSchool } from "@/interfaces/schooladmin";
 
 const ANIMATE_BG = "#BFE6B0"; // falling color
 const FINAL_BG = "#D6F0C8";   // settled color
 const ACTIVE_TEXT = "#43b771";
 
-type School = {
-  id: string;
-  name?: string;
-  icon?: string | null;
-};
-
 export default function SchoolAdminSideBar({
+  school,
   menuItems,
   onClose,
 }: {
+  school: MineSchool;
   menuItems: SidebarItem[];
   onClose?: () => void;
 }) {
@@ -54,6 +51,7 @@ export default function SchoolAdminSideBar({
       onClose?.();
     }
   };
+  const schoolName = school?.name ?? "School";
 
   return (
     <aside className="relative w-64 bg-white h-full flex flex-col border-r border-gray-300">
@@ -64,7 +62,7 @@ export default function SchoolAdminSideBar({
             <img src={school.icon} className="w-full h-full object-contain" />
           ) : (
             <span className="text-white font-bold">
-              {schoolName?.[0] ?? "S"}
+              {school?.name?.[0] ?? "S"}
             </span>
           )}
         </div>

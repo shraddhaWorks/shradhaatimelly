@@ -161,3 +161,37 @@ export interface FeeReceiptInput {
     pincode: string | null;
   };
 }
+
+
+import { Role } from "@/app/generated/prisma";
+
+export interface MeContext {
+  user: {
+    id: string;
+    name: string;
+    email: string ;
+    role: Role;
+  };
+
+  student: {
+    id: string;
+    admissionNo: string;
+    rollNo: string ;
+    dob: Date;
+  };
+
+  class: {
+    id: string;
+    name: string;
+    section: string ;
+  } ;
+
+  school: {
+    id: string;
+    name: string;
+    icon: string | null;
+    city: string;
+    state: string;
+    district: string;
+  };
+}

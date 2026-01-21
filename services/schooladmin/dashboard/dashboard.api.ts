@@ -10,4 +10,5 @@ export const api = {
     leavesPending: () => fetch("/api/leaves/pending").then(r => r.json()),
     tcRequestsAll: () => fetch("/api/tc/list").then(r => r.json()),
     tcRequestsPending: () => fetch(`/api/tc/list?status=PENDING`).then(r => r.json()),
+    mySchool:() => fetch("/api/school/mine").then(r => r.json()),
 };
