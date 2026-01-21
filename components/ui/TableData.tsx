@@ -24,7 +24,7 @@ export default function DataTable<T>({
   emptyText = "No data found",
 }: DataTableProps<T>) {
   return (
-    <div className="overflow-hidden border border-gray-200 rounded-xl animate-slide-in-left">
+    <div className="overflow-x-auto border border-gray-200 rounded-xl animate-slide-in-left">
       <table className="w-full text-sm border-collapse">
         <thead
           style={{ backgroundColor: LIGHT_BG_COLOR }}

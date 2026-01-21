@@ -12,6 +12,7 @@ import { MAIN_COLOR } from "@/constants/colors";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "@/services/toast/toast.service";
+import { FiSearch } from "react-icons/fi";
 
 export default function FeePaymentsPage({
   classes,
@@ -23,11 +24,23 @@ export default function FeePaymentsPage({
   stats: any;
 }) {
   const [selectedClass, setSelectedClass] = useState("");
+  const [search, setSearch] = useState("");
+
 
   const filteredFees = useMemo(() => {
     if (!selectedClass) return [];
-    return fees.filter((fee) => fee.student.class?.id === selectedClass);
-  }, [fees, selectedClass]);
+
+    return fees
+      .filter((fee) => fee.student.class?.id === selectedClass)
+      .filter((fee) => {
+        const name = fee.student.user.name.toLowerCase();
+        const roll = String(fee.rollNo ?? "").toLowerCase();
+        const q = search.toLowerCase();
+
+        return name.includes(q) || roll.includes(q);
+      });
+  }, [fees, selectedClass, search]);
+
 
   const classStats = useMemo(() => {
     if (!selectedClass) return null;
@@ -222,15 +235,31 @@ export default function FeePaymentsPage({
       {selectedClass ? (
         <motion.div initial="hidden" animate="visible" variants={slideFromLeft}>
           <AnimatedCard>
-            <div className="p-4">
-              <h3 className="font-semibold mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h3 className="font-semibold">
                 Fee Details -{" "}
                 {classes.find((c) => c.id === selectedClass)?.name} -{" "}
                 {classes.find((c) => c.id === selectedClass)?.section}
               </h3>
 
-              <FeeDetails fees={filteredFees} loading={false} />
+              <div className="relative w-full sm:w-[260px]">
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search by name or roll no..."
+                  className="
+                    w-full h-10 pl-10 pr-3
+                    border border-gray-200
+                    rounded-lg text-sm
+                    focus:outline-none focus:ring-2 focus:ring-gray-200
+                  "
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <FiSearch/>
+                </span>
+              </div>
             </div>
+            <FeeDetails fees={filteredFees} />
           </AnimatedCard>
         </motion.div>
       ) : (

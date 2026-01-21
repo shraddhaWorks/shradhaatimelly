@@ -17,6 +17,7 @@ import SchoolAdminClassesPage from "@/components/schooladmin/classes/Classes";
 import WorkshopsPage from "@/components/schooladmin/workshops/WorkShops";
 import AnalysisClient from "@/components/schooladmin/analysis/Analysis";
 import NewsfeedPage from "@/components/schooladmin/newsfeed/Newsfeed";
+import StudentDetails from "@/components/schooladmin/studentDetails/StudentDetails";
 
 export default function SchoolAdminLayout() {
   const [open, setOpen] = useState(false);
@@ -100,6 +101,8 @@ export default function SchoolAdminLayout() {
         return <NewsfeedPage />;
       case "analysis":
         return <AnalysisClient />;
+      case "student-details":
+        return <StudentDetails />;
       default:
         return (
           <DashboardTab

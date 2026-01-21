@@ -1,4 +1,6 @@
+import { IGetStudentDetailsResponse, IStudent, IUpdateStudentPayload } from "@/interfaces/studentdetails";
 import { api } from "../api";
+import axios from "axios";
 
 export const getStudents = (classId?: string) =>
   api(`/api/students${classId ? `?classId=${classId}` : ""}`);
@@ -27,3 +29,25 @@ export const assignStudentsToClass = (studentId: string, classId: string) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ studentId, classId }),
   });
+
+
+export const studentApi = {
+  getByAdmissionNo: (admissionNo: string, academicYear?: string) =>
+    axios.get("/api/school/student/by-admissionNo", {
+      params: { admissionNo, academicYear },
+    }),
+
+
+  updateByAdmissionNo: (
+    admissionNo: string,
+    updates: IUpdateStudentPayload
+  ) =>
+    axios.patch<{ student: IStudent }>(
+      "/api/school/student/by-admissionNo",
+      { admissionNo, updates }
+    ),
+};
+
+
+
+

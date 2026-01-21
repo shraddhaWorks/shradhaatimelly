@@ -74,6 +74,12 @@ export const SCHOOLADMIN_MENU_ITEMS: SidebarItem[] = [
     icon: FiCreditCard,
   },
   {
+    label: "Student Details",
+    tab: "student-details",
+    href: "/frontend/schooladmin/dashboard?tab=student-details",
+    icon: FiUsers,
+  },
+  {
     label: "Analysis",
     tab: "analysis",
     href: "/frontend/schooladmin/dashboard?tab=analysis",
