@@ -16,10 +16,11 @@ import ParentCertificates from "@/components/parent/certificates/ParentCertifica
 
 
 import { useParentDashboardData } from "@/hooks/parent/useParentDashboard";
-import { StudentFeeApiResponse } from "@/interfaces/student";
+import { MeContext, StudentFeeApiResponse } from "@/interfaces/student";
 import MobileBottomNav from "@/components/ui/parentportal/MobileBottomBar";
 import MobileRadialMenu from "@/components/ui/parentportal/MobileRadialMenu";
 import MobileTopBar from "@/components/ui/parentportal/MobileTopBar";
+import { MineSchool } from "@/interfaces/schooladmin";
 
 
 export default function ParentDashboardLayout() {
@@ -34,8 +35,10 @@ export default function ParentDashboardLayout() {
     teachers,
     fees,
     news,
+    studentSchoolInfo,
     events,
     feesAllRes,
+    schoolMine,
     reloadHomework,
     reloadAppointments,
     reloadFee,
@@ -56,7 +59,7 @@ export default function ParentDashboardLayout() {
       case "certificates":
         return <ParentCertificates />;
       default:
-        return <ParentDashboard events={events} attendanceStats={attendanceStats} />;
+        return <ParentDashboard events={events} attendanceStats={attendanceStats} studentSchoolInfo={studentSchoolInfo as MeContext}/>;
     }
   };
 
@@ -65,7 +68,7 @@ export default function ParentDashboardLayout() {
       
       {/* ===== DESKTOP SIDEBAR ===== */}
       <aside className="hidden md:block">
-        <SchoolAdminSideBar menuItems={PARENT_MENU_ITEMS} />
+        <SchoolAdminSideBar school={schoolMine as MineSchool} menuItems={PARENT_MENU_ITEMS} />
       </aside>
 
       {/* ===== MAIN ===== */}

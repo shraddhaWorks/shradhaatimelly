@@ -13,3 +13,21 @@ export interface ITransferCertificate {
   requestedBy: { id: string; name: string | null; email: string | null } | null;
   approvedBy: { id: string; name: string | null; email: string | null } | null;
 }
+
+export interface MineSchool {
+  id: string;
+  name: string;
+  address: string;
+  location: string;
+  icon?: string | null;
+  pincode: string;
+  district: string;
+  state: string;
+  city: string;
+  createdAt: string;
+}
+
+export interface GetMySchoolResponse {
+  message?: string;
+  school: MineSchool ;
+}

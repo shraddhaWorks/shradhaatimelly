@@ -85,6 +85,12 @@ export const SCHOOLADMIN_MENU_ITEMS: SidebarItem[] = [
     href: "/frontend/schooladmin/dashboard?tab=analysis",
     icon: FiBarChart2,
   },
+  {
+    label: "Exams",
+    tab: "exams",
+    href: "/frontend/schooladmin/dashboard?tab=exams",
+    icon: FiFileText,
+  },
   // {
   //   label: "New User",
   //   tab: "new-user",

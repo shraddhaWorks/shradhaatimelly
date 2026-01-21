@@ -6,10 +6,11 @@ import SelectField from "@/components/ui/common/SelectField";
 import EmptyFeeState from "@/components/ui/fee/EmptyFeeState";
 import FeeDetails from "@/components/ui/fee/FeeDetails";
 import FeeStats from "@/components/ui/fee/FeeStats";
+
 import { useMemo, useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { MAIN_COLOR } from "@/constants/colors";
-import jsPDF from "jspdf";
+
 import autoTable from "jspdf-autotable";
 import { toast } from "@/services/toast/toast.service";
 import { FiSearch } from "react-icons/fi";
@@ -27,6 +28,7 @@ export default function FeePaymentsPage({
   const [search, setSearch] = useState("");
 
 
+  /* ---------------- FILTERED FEES ---------------- */
   const filteredFees = useMemo(() => {
     if (!selectedClass) return [];
 
@@ -42,6 +44,7 @@ export default function FeePaymentsPage({
   }, [fees, selectedClass, search]);
 
 
+  /* ---------------- CLASS STATS ---------------- */
   const classStats = useMemo(() => {
     if (!selectedClass) return null;
 
@@ -71,32 +74,31 @@ export default function FeePaymentsPage({
     };
   }, [filteredFees, selectedClass]);
 
+  /* ---------------- ANIMATION ---------------- */
   const slideFromLeft: Variants = {
-    hidden: {
-      opacity: 0,
-      x: -40,
-    },
+    hidden: { opacity: 0, x: -40 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: {
-        duration: 0.45,
-        ease: [0.25, 0.1, 0.25, 1],
-      },
+      transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] },
     },
   };
 
-  const handleDownloadPDF = () => {
+  /* ---------------- PDF DOWNLOAD ---------------- */
+  const handleDownloadPDF = async () => {
     if (!selectedClass || !classStats) {
       toast.error("Please select a class to generate the report.");
-      return
-    };
+      return;
+    }
+
+    // ✅ Browser-only import (NO SSR)
+    const { default: jsPDF } = await import("jspdf");
 
     const doc = new jsPDF("p", "mm", "a4");
 
     const selectedClassObj = classes.find((c) => c.id === selectedClass);
 
-    /* ---------------- HEADER ---------------- */
+    /* ---------- HEADER ---------- */
     doc.setFontSize(16);
     doc.text("Fee Payment Report", 14, 18);
 
@@ -109,7 +111,7 @@ export default function FeePaymentsPage({
     );
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 32);
 
-    /* ---------------- SUMMARY ---------------- */
+    /* ---------- SUMMARY ---------- */
     doc.setTextColor(0);
     doc.setFontSize(13);
     doc.text("Summary", 14, 44);
@@ -128,14 +130,18 @@ export default function FeePaymentsPage({
       ],
       theme: "grid",
       headStyles: {
-        fillColor: [67, 183, 113], // matches MAIN_COLOR
+        fillColor: [67, 183, 113],
         textColor: 255,
       },
     });
 
-    /* ---------------- DETAILS TABLE ---------------- */
+    /* ---------- DETAILS ---------- */
     doc.setFontSize(13);
-    doc.text("Student Fee Details", 14, (doc as any).lastAutoTable.finalY + 12);
+    doc.text(
+      "Student Fee Details",
+      14,
+      (doc as any).lastAutoTable.finalY + 12
+    );
 
     autoTable(doc, {
       startY: (doc as any).lastAutoTable.finalY + 16,
@@ -157,31 +163,26 @@ export default function FeePaymentsPage({
         fee.remainingFee,
         fee.remainingFee <= 0 ? "PAID" : "PENDING",
       ]),
-      styles: {
-        fontSize: 9,
-      },
+      styles: { fontSize: 9 },
       headStyles: {
         fillColor: [240, 240, 240],
         textColor: 0,
       },
-      didParseCell: function (data) {
-        // Status column = index 5
+      didParseCell(data) {
         if (data.section === "body" && data.column.index === 5) {
-          if (data.cell.raw === "PAID") {
-            data.cell.styles.textColor = [0, 150, 0];
-          } else {
-            data.cell.styles.textColor = [200, 0, 0];
-          }
+          data.cell.styles.textColor =
+            data.cell.raw === "PAID" ? [0, 150, 0] : [200, 0, 0];
         }
       },
     });
 
-    /* ---------------- SAVE ---------------- */
+    /* ---------- SAVE ---------- */
     doc.save(
       `Fee_Report_${selectedClassObj?.name}_${selectedClassObj?.section}.pdf`
     );
   };
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="space-y-6">
       <motion.div initial="hidden" animate="visible" variants={slideFromLeft}>
@@ -193,13 +194,7 @@ export default function FeePaymentsPage({
 
       <motion.div initial="hidden" animate="visible" variants={slideFromLeft}>
         <AnimatedCard>
-          <div
-            className="
-                    p-4
-                    flex flex-col gap-4
-                    sm:flex-row sm:items-end sm:justify-between
-                  "
-          >
+          <div className="p-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <SelectField
               label="Select Class"
               value={selectedClass}
@@ -211,18 +206,9 @@ export default function FeePaymentsPage({
             />
 
             <button
-              style={{ backgroundColor: `${MAIN_COLOR}` }}
+              style={{ backgroundColor: MAIN_COLOR }}
               onClick={handleDownloadPDF}
-              className="
-                  text-white
-                  h-[44px]
-                  px-6
-                  rounded-lg
-                  text-sm font-medium
-                  whitespace-nowrap
-                  hover:opacity-90
-                  transition
-                  w-full sm:w-auto"
+              className="text-white h-[44px] px-6 rounded-lg text-sm font-medium hover:opacity-90 transition w-full sm:w-auto"
             >
               Download PDF
             </button>
@@ -237,8 +223,8 @@ export default function FeePaymentsPage({
           <AnimatedCard>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <h3 className="font-semibold">
-                Fee Details -{" "}
-                {classes.find((c) => c.id === selectedClass)?.name} -{" "}
+                Fee Details –{" "}
+                {classes.find((c) => c.id === selectedClass)?.name} –{" "}
                 {classes.find((c) => c.id === selectedClass)?.section}
               </h3>
 

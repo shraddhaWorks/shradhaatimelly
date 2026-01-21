@@ -1,4 +1,4 @@
-import { ITransferCertificate } from "@/interfaces/schooladmin";
+import { ITransferCertificate, MineSchool } from "@/interfaces/schooladmin";
 import { api } from "@/services/schooladmin/dashboard/dashboard.api";
 import { calculateTodayAttendance } from "@/services/schooladmin/dashboard/dashboard.utils";
 import { useEffect, useState, useCallback } from "react";
@@ -30,6 +30,7 @@ export function useDashboardData() {
   const [feesCollected, setFeesCollected] = useState<number>(0);
   const [feeDetails, setFeeDetails] = useState<any[]>([]);
   const [feeStats, setFeeStats] = useState<any>(null);
+  const [schoolMine, setSchoolMine] = useState<MineSchool>({} as MineSchool);
 
   /* ---------------- DERIVED STATE ---------------- */
   const [stats, setStats] = useState<any>({
@@ -85,7 +86,8 @@ export function useDashboardData() {
         leavesAll,
         leavesPending,
         tcRequestsAll,
-        tcRequestsPending
+        tcRequestsPending,
+        schoolMineRes
       ] = await Promise.all([
         api.classes(),
         api.students(),
@@ -97,7 +99,8 @@ export function useDashboardData() {
         api.leavesAll(),
         api.leavesPending(),
         api.tcRequestsAll(),
-        api.tcRequestsPending()
+        api.tcRequestsPending(),
+        api.mySchool()
       ]);
 
       setClasses(safeArray(classesRes?.classes));
@@ -113,6 +116,7 @@ export function useDashboardData() {
       setFeeDetails(safeArray(feesRes?.fees));
       setAllTCRequests(safeArray(tcRequestsAll?.tcs));
       setPendingTCRequests(safeArray(tcRequestsPending?.tcs));
+      setSchoolMine(schoolMineRes?.school);
 
     } catch {
       setError({
@@ -234,6 +238,7 @@ export function useDashboardData() {
     teacherPendingLeaves,
     tcRequestsAll: allTCRequests,
     tcRequestsPending: pendingTCRequests,
+    schoolMine,
 
     // reloads
     reloadAll: loadAll,
