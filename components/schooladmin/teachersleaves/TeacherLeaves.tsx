@@ -26,7 +26,7 @@ export default function TeacherLeavesPage({
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
-      <h1 className="text-xl sm:text-2xl font-semibold">Teacher Leaves</h1>
+      <h1 className="text-xl sm:text-2xl font-semibold text-black">Teacher Leaves</h1>
       <p className="text-sm text-muted-foreground">
         Review and manage teacher leave requests
       </p>

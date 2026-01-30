@@ -1,6 +1,6 @@
 export default function SchoolAdminNewsFeedCard({ news }: { news: any[] }) {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
+    <div className="bg-white rounded-xl p-6 shadow-sm" style ={{ backgroundColor: "rgba(163, 230, 53, 0.1)" }}>
       <h3 className="font-medium mb-3">Latest News</h3>
 
       <div className="space-y-3">

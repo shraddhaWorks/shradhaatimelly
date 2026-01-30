@@ -101,7 +101,7 @@ export default function ExamsPage() {
       <motion.div variants={itemVariants}>
         <div className="flex items-center gap-2 mb-1">
           <FileText className="text-green-500" size={20} />
-          <h2 className="text-xl font-semibold">Exams</h2>
+          <h2 className="text-xl font-semibold text-black">Exams</h2>
         </div>
         <p className="text-sm text-gray-500 mb-6">
           Create and manage exam sets

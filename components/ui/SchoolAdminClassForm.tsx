@@ -112,8 +112,8 @@ export default function CreateClassForm({ teachers, loadingTeachers, reload }: P
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="bg-white rounded-2xl p-4 sm:p-6 space-y-6 shadow-md"
-        >
+          className="bg-white rounded-2xl p-4 sm:p-6 space-y-6 shadow-lg"
+        style ={{backgroundColor:"transparent"}}>
           {/* Header */}
           <motion.div variants={itemVariants}>
             <div className="flex items-start gap-3">

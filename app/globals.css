@@ -19,12 +19,22 @@
   }
 }
 
-body {
+/* body {
   background: var(--background);
   color: var(--foreground);
     font-family: var(--font-poppins), sans-serif;
-}
+} */
 
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px circle at 20% 20%, #5b2bff55, transparent 40%),
+    radial-gradient(1000px circle at 80% 30%, #ff7a1855, transparent 45%),
+    radial-gradient(800px circle at 50% 80%, #00ffcc33, transparent 50%),
+    linear-gradient(135deg, #0b0616 0%, #140b2d 40%, #1b0f2e 60%, #0b0616 100%);
+  background-attachment: fixed;
+}
 @keyframes fadeInLeft {
   from {
     opacity: 0;

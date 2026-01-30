@@ -8,8 +8,8 @@ import { SidebarItem } from "@/constants/schooladmin/sidebar";
 import BrandLogo from "../ui/common/BrandLogo";
 import { MineSchool } from "@/interfaces/schooladmin";
 
-const ANIMATE_BG = "#BFE6B0"; // falling color
-const FINAL_BG = "#D6F0C8";   // settled color
+const ANIMATE_BG = "#BFE6B0"; 
+const FINAL_BG = "#D6F0C8";   
 const ACTIVE_TEXT = "#43b771";
 
 export default function SchoolAdminSideBar({
@@ -25,16 +25,16 @@ export default function SchoolAdminSideBar({
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "dashboard";
 
-  const [schoolName, setSchoolName] = useState("Loading...");
-  const [school, setSchool] = useState<School | null>(null);
+  const [isSchoolName, setIsSchoolName] = useState("Loading...");
+  const [isSchool, setIsSchool] = useState<MineSchool | null>(null);
 
   useEffect(() => {
     const fetchSchool = async () => {
       const res = await fetch("/api/school/mine", { credentials: "include" });
       const data = await res.json();
       if (data?.school) {
-        setSchool(data.school);
-        setSchoolName(data.school.name || "School");
+        setIsSchool(data.school);
+        setIsSchoolName(data.school.name || "School");
       }
     };
     fetchSchool();
@@ -54,9 +54,15 @@ export default function SchoolAdminSideBar({
   const schoolName = school?.name ?? "School";
 
   return (
-    <aside className="relative w-64 bg-white h-full flex flex-col border-r border-gray-300">
+    <aside className="relative w-64 h-full flex flex-col "  style={{backgroundColor:"transparent", border:'none'}}>
+      {/* BRAND LOGO */}
+      <div className=" h-14 flex items-center shadow-md px-4">
+        <div className="-ml-8 scale-[0.9]">
+          <BrandLogo isbrandLogoWhite={true} />
+        </div>
+      </div>
       {/* TOP BRAND */}
-      <div className="px-4 py-5 flex items-center gap-3 border-b border-gray-200">
+      <div className="px-4 py-5 flex items-center gap-3 shadow-md">
         <div className="w-10 h-10 rounded-full bg-[#43b771] flex items-center justify-center overflow-hidden">
           {school?.icon ? (
             <img src={school.icon} className="w-full h-full object-contain" />
@@ -74,7 +80,7 @@ export default function SchoolAdminSideBar({
       </div>
 
       {/* MENU */}
-      <div className="flex-1 px-3 py-4 overflow-y-auto">
+      <div className="flex-1 px-3 py-4 overflow-y-auto shadow-md " style={{backgroundColor:"transparent", scrollbarWidth:'none'}}>
         {menuItems.map((item) => {
           const isActive = item.tab === activeTab;
           const Icon = item.icon;
@@ -87,6 +93,7 @@ export default function SchoolAdminSideBar({
               whileTap={{ scale: 0.96 }}
               className="relative w-full mb-2 overflow-hidden rounded-xl"
             >
+             
               {/* FINAL SETTLED COLOR */}
               {isActive && (
                 <motion.div
@@ -143,7 +150,7 @@ export default function SchoolAdminSideBar({
       </div>
 
       {/* BOTTOM PROFILE */}
-      <div className="px-4 py-4 border-t border-gray-300 flex items-center gap-3">
+      <div className="px-4 py-4  shadow-md flex items-center gap-3">
         <div className="w-9 h-9 rounded-full bg-[#43b771] text-white flex items-center justify-center text-sm font-semibold">
           AD
         </div>
@@ -154,11 +161,11 @@ export default function SchoolAdminSideBar({
       </div>
 
       {/* BRAND LOGO */}
-      <div className="border-t border-gray-100 h-14 flex items-center px-4">
+      {/* <div className=" h-14 flex items-center px-4">
         <div className="-ml-8 scale-[0.9]">
           <BrandLogo isbrandLogoWhite={false} />
         </div>
-      </div>
+      </div> */}
 
       <div className="pointer-events-none absolute top-0 -right-6 h-full w-6 bg-gradient-to-r from-gray-300/40 to-transparent" />
     </aside>

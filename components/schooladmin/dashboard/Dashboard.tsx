@@ -50,7 +50,7 @@ export default function DashboardTab({
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-black">Dashboard</h1>
         <p className="text-sm text-gray-500">
           Welcome back! Here's an overview of your school
         </p>

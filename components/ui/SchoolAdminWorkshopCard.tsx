@@ -1,6 +1,6 @@
 export default function SchoolAdminWorkshopCard({ workshops }: { workshops: any[] }) {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
+    <div className="bg-white rounded-xl p-6 shadow-sm" style={{ backgroundColor: "rgba(163, 230, 53, 0.1)" }}>
       <h3 className="font-medium mb-3">Upcoming Workshops</h3>
 
       <div className="space-y-3">

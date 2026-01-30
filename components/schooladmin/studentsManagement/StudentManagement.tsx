@@ -77,7 +77,7 @@ export default function StudentsManagementPage({
     <div className="space-y-6">
       {/* ================= Header ================= */}
       <div>
-        <h1 className="text-2xl font-semibold">Students Management</h1>
+        <h1 className="text-2xl font-semibold text-black">Students Management</h1>
         <p className="text-sm text-gray-500">
           Add and manage students by class
         </p>
