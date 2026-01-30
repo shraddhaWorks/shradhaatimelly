@@ -19,14 +19,6 @@ import AnalysisClient from "@/components/schooladmin/analysis/Analysis";
 import NewsfeedPage from "@/components/schooladmin/newsfeed/Newsfeed";
 import StudentDetails from "@/components/schooladmin/studentDetails/StudentDetails";
 
-import MobileTopBar from "@/components/ui/parentportal/MobileTopBar";
-import MobileBottomNav from "@/components/ui/parentportal/MobileBottomBar";
-import MobileRadialMenu from "@/components/ui/parentportal/MobileRadialMenu";
-
-
-import { MineSchool } from "@/interfaces/schooladmin";
-import ExamsPage from "@/components/schooladmin/exams/exams";
-
 export default function SchoolAdminLayout() {
   const [open, setOpen] = useState(false);
   const tab = useSearchParams().get("tab") ?? "dashboard";

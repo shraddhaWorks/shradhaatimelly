@@ -48,7 +48,13 @@ export default function ParentDashboardLayout() {
   const renderPage = () => {
     switch (tab) {
       case "profile":
-        return <ParentStudentProfile />;
+          return (
+            <ParentStudentProfile
+              me={studentSchoolInfo as MeContext}
+              loading={loading}
+            />
+          );
+
       case "homework":
         return <ParentHomework homeworks={homeworks} loading={loading} reloadHomework={reloadHomework} />;
       case "attendance":
@@ -71,7 +77,16 @@ export default function ParentDashboardLayout() {
 
       {/* ===== DESKTOP SIDEBAR ===== */}
       <aside className="hidden md:block">
-        <SchoolAdminSideBar school={schoolMine as MineSchool} menuItems={PARENT_MENU_ITEMS} />
+        <SchoolAdminSideBar
+  school={schoolMine as MineSchool}
+  menuItems={PARENT_MENU_ITEMS}
+  profile={{
+    name: studentSchoolInfo?.student?.user?.name ?? "Student",
+    initials: studentSchoolInfo?.student?.user?.name?.[0] ?? "S",
+  }}
+  roleLabel="Parent"
+/>
+
       </aside>
 
       {/* ===== MAIN ===== */}

@@ -166,32 +166,23 @@ export interface FeeReceiptInput {
 import { Role } from "@/app/generated/prisma";
 
 export interface MeContext {
-  user: {
-    id: string;
-    name: string;
-    email: string ;
-    role: Role;
-  };
-
   student: {
     id: string;
-    admissionNo: string;
-    rollNo: string ;
-    dob: Date;
-  };
+    fatherName: string;
+    phoneNo: string;
+    dob: string;
+    rollNo?: string;
+    AdmissionNo?: string;
+    address?: string;
 
-  class: {
-    id: string;
-    name: string;
-    section: string ;
-  } ;
+    user: {
+      name?: string;
+      email?: string;
+    };
 
-  school: {
-    id: string;
-    name: string;
-    icon: string | null;
-    city: string;
-    state: string;
-    district: string;
+    class?: {
+      name: string;
+      section?: string;
+    };
   };
 }
