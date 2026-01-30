@@ -23,13 +23,16 @@ export default function SchoolAdminStatCard({
       className={`
         relative overflow-hidden rounded-2xl 
         p-6 min-h-[160px]
-        ${bg}
+     text-white
         shadow-sm hover:shadow-lg
         transition-all duration-300
         hover:-translate-y-1
         animate-fade-in
       `}
-      style={{ animationDelay: `${index * 120}ms` }}
+      style={{
+        animationDelay: `${index * 120}ms`,
+        backgroundColor: "rgba(163, 230, 53, 0.1)",
+      }}
     >
       {/* op-right trending icon (GREEN, no background) */}
       <div className="absolute top-4 right-4">
@@ -44,8 +47,8 @@ export default function SchoolAdminStatCard({
       </div>
 
       {/* Content */}
-      <h2 className="text-2xl font-bold mt-4 text-gray-900">{value}</h2>
-      <p className="text-sm text-gray-600 font-medium">{title}</p>
+      <h2 className="text-2xl font-bold mt-4 text-white-900">{value}</h2>
+      <p className="text-sm text-white-600 font-medium">{title}</p>
     </div>
   );
 }

@@ -208,7 +208,7 @@ export default function AddSchoolPage() {
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">Add New School</h1>
+          <h1 className="text-2xl font-semibold text-black">Add New School</h1>
           <div className="flex gap-3">
             <button
               type="button"

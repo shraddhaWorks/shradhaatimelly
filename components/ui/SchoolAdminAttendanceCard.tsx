@@ -14,7 +14,7 @@ export default function SchoolAdminAttendanceCard({
   const safePercent = Math.min(Math.max(percent, 0), 100);
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm flex items-center gap-6">
+    <div className=" rounded-xl p-6 shadow-sm flex items-center gap-6" style= {{ backgroundColor: "rgba(163, 230, 53, 0.1)"}}>
       {/* Circular Progress */}
       <div
         className="w-24 h-24 rounded-full flex items-center justify-center"
