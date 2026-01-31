@@ -103,3 +103,18 @@ export const SCHOOLADMIN_MENU_ITEMS: SidebarItem[] = [
     action: "logout",
   },
 ];
+
+export const SCHOOLADMIN_TAB_TITLES: Record<string, string> = {
+  dashboard: "Dashboard",
+  students: "Students",
+  teachers: "Teachers",
+  classes: "Classes",
+  "teacher-leaves": "Teacher Leaves",
+  "tc-approvals": "TC Approvals",
+  payments: "Payments",
+  workshops: "Workshops",
+  newsfeed: "Newsfeed",
+  exams: "Exams",
+  analysis: "Analysis",
+  "student-details": "Student Details",
+};

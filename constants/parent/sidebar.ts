@@ -67,3 +67,15 @@ export const PARENT_MENU_ITEMS: SidebarItem[] = [
     action: "logout",
   },
 ];
+
+
+export const PARENT_TAB_TITLES: Record<string, string> = {
+  dashboard: "Dashboard",
+  homework: "Homework",
+  attendance: "Attendance",
+  marks: "Marks",
+  chat: "Teacher Chat",
+  workshops: "Workshops",
+  fees: "Fees",
+  certificates: "Certificates",
+};

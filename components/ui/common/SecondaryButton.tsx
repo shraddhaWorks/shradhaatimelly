@@ -3,20 +3,18 @@ import { motion } from "framer-motion";
 interface ButtonProps {
   title: string;
   loading?: boolean;
-  onClick?:()=>void
+  onClick?: () => void;
 }
 
-export default function PrimaryButton({ title, loading,onClick }: ButtonProps) {
+export default function SecondaryButton({ title, loading,onClick }: ButtonProps) {
   return (
     <motion.button
-      onClick={onClick}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
       disabled={loading}
+      onClick={onClick}
       type="submit"
-      className="bg-lime-400 text-slate-900 font-semibold
-       rounded-xl hover:bg-lime-500 
-       shadow-lg shadow-lime-400/20"
+      className="bg-white/5 text-white border border-white/10 rounded-xl hover:bg-white/10 m-4 py-2 rounded-xl"
     >
       {loading ? "Logging in..." : title}
     </motion.button>
