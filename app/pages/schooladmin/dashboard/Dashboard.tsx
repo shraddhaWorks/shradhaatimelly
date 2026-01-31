@@ -5,7 +5,7 @@ import { Menu } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 import SchoolAdminSideBar from "@/components/layout/SchoolAdminSideBar";
-import { SCHOOLADMIN_MENU_ITEMS } from "@/constants/schooladmin/sidebar";
+import { SCHOOLADMIN_MENU_ITEMS, SCHOOLADMIN_TAB_TITLES } from "@/constants/schooladmin/sidebar";
 import DashboardTab from "@/components/schooladmin/dashboard/Dashboard";
 import { useDashboardData } from "@/hooks/useSchoolAdminDashboard";
 import TeachersPage from "@/components/schooladmin/teachers/Teachers";
@@ -19,10 +19,13 @@ import NewsfeedPage from "@/components/schooladmin/newsfeed/Newsfeed";
 import StudentDetails from "@/components/schooladmin/studentDetails/StudentDetails";
 import ExamsPage from "@/components/schooladmin/exams/exams";
 import { MineSchool } from "@/interfaces/schooladmin";
+import AppHeader from "@/components/layout/AppHeader";
 
 export default function SchoolAdminLayout() {
   const [open, setOpen] = useState(false);
   const tab = useSearchParams().get("tab") ?? "dashboard";
+  const headerTitle =
+  SCHOOLADMIN_TAB_TITLES[tab] ?? "Dashboard";
 
   const {
     loading,
@@ -135,12 +138,7 @@ export default function SchoolAdminLayout() {
       {/* ========== MAIN CONTENT ========== */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Top Bar */}
-        <div className="md:hidden flex items-center gap-3 p-4 bg-white/10 backdrop-blur-xl border-b border-white/20">
-          <button onClick={() => setOpen(true)}>
-            <Menu className="text-white" />
-          </button>
-          <h1 className="font-semibold text-white">Admin Panel</h1>
-        </div>
+         <AppHeader onMenuClick={() => setOpen(true)} title={headerTitle}/>
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-white/5 backdrop-blur-xl border-t border-l border-white/10 rounded-tl-2xl">
