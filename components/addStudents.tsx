@@ -128,6 +128,7 @@ export default function AddStudentPage() {
                   required
                   className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
                 />
+                <p>hello</p>
               </div>
 
               {/** Email */}
