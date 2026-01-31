@@ -16,7 +16,8 @@ export default function PrimaryButton({ title, loading,onClick }: ButtonProps) {
       type="submit"
       className="bg-lime-400 text-slate-900 font-semibold
        rounded-xl hover:bg-lime-500 
-       shadow-lg shadow-lime-400/20"
+       shadow-lg shadow-lime-400/20
+       w-full py-3"
     >
       {loading ? "Logging in..." : title}
     </motion.button>
