@@ -4,51 +4,59 @@ import { TrendingUp } from "lucide-react";
 interface Props {
   title: string;
   value: string | number;
+  subtitle?: string;
   icon: ReactNode;
-  bg: string;
-  iconBg: string;
   index?: number;
 }
 
 export default function SchoolAdminStatCard({
+  icon,
   title,
   value,
-  icon,
-  bg,
-  iconBg,
+  subtitle,
   index = 0,
 }: Props) {
   return (
     <div
       className={`
-        relative overflow-hidden rounded-2xl 
-        p-6 min-h-[160px]
-     text-white
-        shadow-sm hover:shadow-lg
+        relative rounded-2xl p-6 min-h-[150px]
+        text-white overflow-hidden
+        bg-white/5
+        backdrop-blur-2xl
+        border border-white/10
+        shadow-lg
         transition-all duration-300
-        hover:-translate-y-1
+        hover:-translate-y-1 hover:bg-white/10
         animate-fade-in
       `}
-      style={{
-        animationDelay: `${index * 120}ms`,
-        backgroundColor: "rgba(163, 230, 53, 0.1)",
-      }}
+      style={{ animationDelay: `${index * 120}ms` }}
     >
-      {/* op-right trending icon (GREEN, no background) */}
-      <div className="absolute top-4 right-4">
-        <TrendingUp className="w-5 h-5 text-green-500" />
-      </div>
+      {/* Trending */}
+      <TrendingUp className="absolute top-4 right-4 w-5 h-5 text-lime-400" />
 
-      {/* 🌫️ Large faded background icon */}
-      <div className="flex items-center justify-center w-10 h-10 rounded-xl">
-        <div className={`h-10 h-10 text-gray-700 ${iconBg} rounded-full flex items-center justify-center p-2`}>
+      {/* Icon */}
+      <div className="mb-4">
+        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
           {icon}
         </div>
       </div>
 
-      {/* Content */}
-      <h2 className="text-2xl font-bold mt-4 text-white-900">{value}</h2>
-      <p className="text-sm text-white-600 font-medium">{title}</p>
+      {/* Title */}
+      <p className="text-sm text-white/70 font-medium">
+        {title}
+      </p>
+
+      {/* Value */}
+      <h2 className="text-3xl font-bold mt-1">
+        {value}
+      </h2>
+
+      {/* KPI */}
+      {subtitle && (
+        <p className="mt-2 text-sm text-lime-400 font-semibold">
+          {subtitle}
+        </p>
+      )}
     </div>
   );
 }
